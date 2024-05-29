@@ -12,7 +12,7 @@ $routes->group("api", function ($routes) {
     $routes->post("users/register", "Register::index");
     $routes->post("users/login", "Login::index");
     $routes->get("users", "User::index", ['filter' => 'authFilter']);
-    $routes->get('users/show/(:num)', 'User::show/$1');
+    $routes->get('users/show/(:num)', 'User::show/$1', ['filter' => 'authFilter']);
     $routes->put('users/update/(:num)', 'User::update/$1');
     $routes->delete('users/delete/(:num)', 'User::delete/$1');
 
