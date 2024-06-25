@@ -11,7 +11,7 @@ class Cuota extends BaseController
     public function create()
     {
         $cuotaModel = new CuotaModel();
-        //var_dump($this->request->getPost("fecha"));
+        d($this->request->getPost("fecha"));
         $data = [
             'FECHA' => $this->request->getPost('FECHA'),
             'ESTADO' => $this->request->getPost('ESTADO'),
@@ -32,9 +32,7 @@ class Cuota extends BaseController
                 "response" => ResponseInterface::HTTP_CONFLICT,
             ];
         }
-        header("Access-Control-Allow-Origin: *");
-        header("Access-Control-Allow-Methods: *");
-        header("Access-Control-Allow-Headers: *");   
+
         return $this->response->setJSON($dataResult);
     }
 
