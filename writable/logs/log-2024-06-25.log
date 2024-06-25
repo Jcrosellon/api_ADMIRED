@@ -1,0 +1,11 @@
+CRITICAL - 2024-06-25 00:02:08 --> CodeIgniter\Filters\Exceptions\FilterException: "Config\Cors" must implement CodeIgniter\Filters\FilterInterface.
+[Method: POST, Route: api/cuotas_administracion/create]
+in SYSTEMPATH/Filters/Filters.php on line 200.
+ 1 SYSTEMPATH/Filters/Filters.php(200): CodeIgniter\Filters\Exceptions\FilterException::forIncorrectInterface('Config\\Cors')
+ 2 SYSTEMPATH/Filters/Filters.php(184): CodeIgniter\Filters\Filters->runBefore([...])
+ 3 SYSTEMPATH/CodeIgniter.php(481): CodeIgniter\Filters\Filters->run('api/cuotas_administracion/create', 'before')
+ 4 SYSTEMPATH/CodeIgniter.php(355): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 5 SYSTEMPATH/Boot.php(312): CodeIgniter\CodeIgniter->run()
+ 6 SYSTEMPATH/Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 7 FCPATH/index.php(55): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+ 8 SYSTEMPATH/Commands/Server/rewrite.php(49): require_once('/Applications/XAMPP/xamppfiles/htdocs/SENA/api_ADMIRED/public/index.php')
