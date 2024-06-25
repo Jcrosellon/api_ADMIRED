@@ -11,12 +11,12 @@ class Cuota extends BaseController
     public function create()
     {
         $cuotaModel = new CuotaModel();
-
+        //var_dump($this->request->getPost("fecha"));
         $data = [
-            'NO_TORRE' => $this->request->getPost('NO_TORRE'),
-            'NO_APARTAMENTO' => $this->request->getPost('NO_APARTAMENTO'),
-            'NO_PAQUEADERO' => $this->request->getPost('NO_PAQUEADERO'),
-            'NO_SALON_COMUNAL' => $this->request->getPost('NO_SALON_COMUNAL'),
+            'FECHA' => $this->request->getPost('FECHA'),
+            'ESTADO' => $this->request->getPost('ESTADO'),
+            'FECHA_LIMITE' => $this->request->getPost('FECHA_LIMITE'),
+            'PRECIO' => $this->request->getPost('PRECIO'),
         ];
 
         if ($cuotaModel->insert($data)) {
@@ -28,7 +28,7 @@ class Cuota extends BaseController
         } else {
             $dataResult = [
                 "data" => '',
-                "message" => 'Error al crear unidad',
+                "message" => 'Error al crear cuota',
                 "response" => ResponseInterface::HTTP_CONFLICT,
             ];
         }
@@ -45,7 +45,7 @@ class Cuota extends BaseController
 
     $dataResult = [
         "data" => $cuota,
-        "message" => 'Lista de unidad',
+        "message" => 'Lista de cuotas',
         "response" => ResponseInterface::HTTP_OK,
     ];
 
@@ -62,7 +62,7 @@ class Cuota extends BaseController
         if ($cuota) {
             $dataResult = [
                 "data" => $cuota,
-                "message" => 'Unidad Encontrado',
+                "message" => 'Cuota Encontrado',
                 "response" => ResponseInterface::HTTP_OK,
             ];
         } else {
@@ -87,10 +87,10 @@ class Cuota extends BaseController
     if ($cuota) {
         // Obtener los datos del formulario
         $data = [
-            'NO_TORRE' => $this->request->getVar('NO_TORRE') ?? $cuota['NO_TORRE'],
-            'NO_APARTAMENTO' => $this->request->getVar('NO_APARTAMENTO') ?? $cuota['NO_APARTAMENTO'],
-            'NO_PAQUEADERO' => $this->request->getVar('NO_PAQUEADERO') ?? $cuota['NO_PAQUEADERO'],
-            'NO_SALON_COMUNAL' => $this->request->getVar('NO_SALON_COMUNAL') ?? $cuota['NO_SALON_COMUNAL'],
+            'FECHA' => $this->request->getVar('FECHA') ?? $cuota['FECHA'],
+            'ESTADO' => $this->request->getVar('ESTADO') ?? $cuota['ESTADO'],
+            'FECHA_LIMITE' => $this->request->getVar('FECHA_LIMITE') ?? $cuota['FECHA_LIMITE'],
+            'PRECIO' => $this->request->getVar('PRECIO') ?? $cuota['PRECIO'],
         ];
 
         // Actualizar el usuario en la base de datos

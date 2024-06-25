@@ -13,7 +13,7 @@ class CuotaModel extends Model
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
-    protected $allowedFields    = ['NO_TORRE', 'NO_APARTAMENTO', 'NO_PAQUEADERO', 'NO_SALON_COMUNAL'];
+    protected $allowedFields    = ['FECHA', 'ESTADO', 'FECHA_LIMITE', 'PRECIO'];
 
     // Dates
     // protected $useTimestamps    = true;
