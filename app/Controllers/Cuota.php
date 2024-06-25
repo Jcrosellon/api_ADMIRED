@@ -11,7 +11,6 @@ class Cuota extends BaseController
     public function create()
     {
         $cuotaModel = new CuotaModel();
-        d($this->request->getPost("fecha"));
         $data = [
             'FECHA' => $this->request->getPost('FECHA'),
             'ESTADO' => $this->request->getPost('ESTADO'),
