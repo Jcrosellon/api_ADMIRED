@@ -1,64 +1,38 @@
-<?php namespace App\Controllers;
+<?php
+
+namespace App\Controllers;
 
 use CodeIgniter\RESTful\ResourceController;
-use Firebase\JWT\JWT;
-use Firebase\JWT\Key;
 
-class UserController extends ResourceController
+class Usuarios extends ResourceController
 {
-    protected $modelName = 'App\Models\UserModel';
+    protected $modelName = 'App\Models\UsuariosModel';
     protected $format = 'json';
 
-    // Método para obtener el token de autorización
-    private function getAuthToken() {
-        $headers = $this->request->getServer('HTTP_AUTHORIZATION');
-        if ($headers && strpos($headers, 'Bearer ') === 0) {
-            return trim(substr($headers, 7));
+    public function create()
+    {
+        $data = $this->request->getJSON(true);
+
+        log_message('debug', 'Data received for creation: ' . print_r($data, true));
+
+        if (!$data || empty($data)) {
+            return $this->failValidationErrors(['No data provided']);
         }
-        return null;
+
+        // Encriptar la contraseña
+        if (isset($data['CONTRASENA'])) {
+            $data['CONTRASENA'] = password_hash($data['CONTRASENA'], PASSWORD_DEFAULT);
+        }
+
+        if ($this->model->insert($data) === false) {
+            return $this->failValidationErrors($this->model->errors());
+        }
+
+        return $this->respondCreated($data);
     }
 
-    // Método para validar el token de Firebase
-    private function validateFirebaseToken($token) {
-        $firebasePublicKey = 'YOUR_FIREBASE_PUBLIC_KEY'; // Asegúrate de obtener la clave pública de Firebase
-        try {
-            $decoded = JWT::decode($token, new Key($firebasePublicKey, 'RS256'));
-            return $decoded;
-        } catch (\Exception $e) {
-            return false;
-        }
-    }
-
-    public function create() {
-        $token = $this->getAuthToken();
-        if (!$token || !$this->validateFirebaseToken($token)) {
-            return $this->failUnauthorized('Invalid Firebase token');
-        }
-
-        $data = $this->request->getPost();
-        if ($this->model->insert($data)) {
-            return $this->respondCreated($data);
-        }
-
-        return $this->failValidationErrors($this->model->errors());
-    }
-
-    public function index() {
-        $token = $this->getAuthToken();
-        if (!$token || !$this->validateFirebaseToken($token)) {
-            return $this->failUnauthorized('Invalid Firebase token');
-        }
-
-        $data = $this->model->findAll();
-        return $this->respond($data);
-    }
-
-    public function show($id = null) {
-        $token = $this->getAuthToken();
-        if (!$token || !$this->validateFirebaseToken($token)) {
-            return $this->failUnauthorized('Invalid Firebase token');
-        }
-
+    public function show($id = null)
+    {
         $data = $this->model->find($id);
         if ($data) {
             return $this->respond($data);
@@ -67,26 +41,46 @@ class UserController extends ResourceController
         return $this->failNotFound('User not found');
     }
 
-    public function update($id = null) {
-        $token = $this->getAuthToken();
-        if (!$token || !$this->validateFirebaseToken($token)) {
-            return $this->failUnauthorized('Invalid Firebase token');
+    public function update($id = null)
+    {
+        // Obtener los datos de la solicitud
+        $data = $this->request->getJSON(true); // Cambiado a getJSON(true)
+
+        log_message('debug', 'Data received for update: ' . print_r($data, true));
+
+        if (!$data || empty($data)) {
+            return $this->failValidationErrors('No data provided.');
         }
 
-        $data = $this->request->getRawInput();
-        if ($this->model->update($id, $data)) {
-            return $this->respond($data);
+        // Encriptar la contraseña si está presente
+        if (isset($data['CONTRASENA'])) {
+            $data['CONTRASENA'] = password_hash($data['CONTRASENA'], PASSWORD_DEFAULT);
         }
 
-        return $this->failValidationErrors($this->model->errors());
+        $updateData = [
+            'NOMBRE' => $data['NOMBRE'] ?? null,
+            'APELLIDO' => $data['APELLIDO'] ?? null,
+            'EMAIL' => $data['EMAIL'] ?? null,
+            'CONTRASENA' => isset($data['CONTRASENA']) ? $data['CONTRASENA'] : null,
+            'TELEFONO' => $data['TELEFONO'] ?? null,
+            'TORRE' => $data['TORRE'] ?? null,
+            'APTO' => $data['APTO'] ?? null,
+        ];
+
+        $updateStatus = $this->model->update($id, $updateData);
+
+        if ($updateStatus) {
+            return $this->respondUpdated($updateData);
+        } else {
+            return $this->failServerError('Failed to update user.');
+        }
     }
 
-    public function delete($id = null) {
-        $token = $this->getAuthToken();
-        if (!$token || !$this->validateFirebaseToken($token)) {
-            return $this->failUnauthorized('Invalid Firebase token');
-        }
 
+
+
+    public function delete($id = null)
+    {
         if ($this->model->delete($id)) {
             return $this->respondDeleted(['id' => $id]);
         }
