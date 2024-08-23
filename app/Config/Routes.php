@@ -20,6 +20,7 @@ $routes->group("api", ['filter' => 'cors'], function ($routes) {
 
     // Routes for usuarios
     $routes->post('usuarios/create', 'Usuarios::create');
+    $routes->get('usuarios/show', 'Usuarios::show');
     $routes->get('usuarios/show/(:num)', 'Usuarios::show/$1');
     $routes->put('usuarios/update/(:num)', 'Usuarios::update/$1');
     $routes->delete('usuarios/delete/(:num)', 'Usuarios::delete/$1');
@@ -46,16 +47,6 @@ $routes->group("api", ['filter' => 'cors'], function ($routes) {
     $routes->options('cuotas_administracion/(:any)', '\Dummy');
 
 
-    // Residents
-    $routes->post("resident/create", "Resident::create");
-    $routes->get('resident/show/(:num)', 'Resident::show/$1');
-    $routes->get("resident", "Resident::index");
-    $routes->put("resident/update/(:num)", "Resident::update/$1");
-    $routes->delete("resident/delete/(:num)", "Resident::delete/$1");
-    $routes->options('resident', '\Dummy');
-    $routes->options('resident/(:any)', '\Dummy');
 });
 
 
-$routes->options('api', '\Dummy');
-    $routes->options('api/(:any)', '\Dummy');

@@ -24,11 +24,12 @@ class Login extends BaseController
         }
 
         $pwd_verify = password_verify($password, $user['password']);
+        
 
         if (!$pwd_verify) {
             return $this->respond(['error' => 'Invalid username or password.'], 401);
         }
-
+        
         $key = getenv("JWT_SECRET");
         $iat = time(); // current timestamp value
         $exp = $iat + 3600;
@@ -41,8 +42,10 @@ class Login extends BaseController
             "exp" => $exp, // Expiration time of token
             "email" => $user['email'],
         );
+        return $payload;
 
         $token = JWT::encode($payload, $key, 'HS256');
+       
         $response = [
             'message' => 'Login Successful',
             'token' => $token

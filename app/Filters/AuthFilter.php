@@ -7,6 +7,7 @@ use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
+use Exception;
 
 class AuthFilter implements FilterInterface
 {
@@ -28,32 +29,56 @@ class AuthFilter implements FilterInterface
     public function before(RequestInterface $request, $arguments = null)
     {
         $key = getenv("JWT_SECRET");
-        $header = $request->getHeader("Authorization");
-        $token = null;
 
-        // extract the token from the header
-        if (!empty($header)) {
-            if (preg_match('/Bearer\s(\S+)/', $header, $matches)) {
-                $token = $matches[1];
-            }
+        if (!$key) {
+            return $this->createErrorResponse('JWT Secret Key not set', 500);
         }
-        // check if token is null or empty
+
+        $header = $request->getHeader("Authorization");
+        $token = $this->extractToken($header);
+
         if (is_null($token) || empty($token)) {
-            $response = service('response');
-            $response->setBody('Access denied');
-            $response->setStatusCode(401);
-            return $response;
+            return $this->createErrorResponse('Access denied', 401);
         }
 
         try {
-            // $decoded = JWT::decode($token, $key, array("HS256"));
-            $decoded = JWT::decode($token, new Key($key, 'HS256'));
+            JWT::decode($token, new Key($key, 'HS256'));
         } catch (Exception $ex) {
-            $response = service('response');
-            $response->setBody("Access denied");
-            $response->setStatusCode(401);
-            return $response;
-        }        
+            return $this->createErrorResponse('Access denied', 401);
+        }
+    }
+
+    /**
+     * Extract token from the Authorization header.
+     *
+     * @param string|null $header
+     *
+     * @return string|null
+     */
+    private function extractToken($header)
+    {
+        if (!empty($header)) {
+            if (preg_match('/Bearer\s(\S+)/', $header, $matches)) {
+                return $matches[1];
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Create a response with an error message and status code.
+     *
+     * @param string $message
+     * @param int $statusCode
+     *
+     * @return ResponseInterface
+     */
+    private function createErrorResponse($message, $statusCode)
+    {
+        $response = service('response');
+        $response->setBody($message);
+        $response->setStatusCode($statusCode);
+        return $response;
     }
 
     /**
@@ -70,6 +95,6 @@ class AuthFilter implements FilterInterface
      */
     public function after(RequestInterface $request, ResponseInterface $response, $arguments = null)
     {
-        //
+        // No after filter logic required
     }
 }
