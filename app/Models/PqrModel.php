@@ -13,30 +13,26 @@ class PqrModel extends Model
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
-    protected $allowedFields    = ['DETALLE', 'ESTADO_ID', 'USUARIO_ID', 'PQR_TIPO'];
+    protected $allowedFields    = [
+        'DETALLE',
+        'ESTADO_ID',
+        'USUARIO_ID',
+        'PQR_TIPO',
+        'FECHA_SOLICITUD',
+        'FECHA_RESPUESTA',
+        'RESPUESTA',
+    ];
 
-    // Dates
-    // protected $useTimestamps    = true;
-    // protected $dateFormat       = 'datetime';
-    // protected $createdField     = 'created_at';
-    // protected $updatedField     = 'updated_at';
-    // protected $deletedField     = 'deleted_at';
+    protected $validationRules = [
+        'DETALLE' => 'required|string',
+        'ESTADO_ID' => 'required|numeric',
+        'USUARIO_ID' => 'required|numeric',
+        'PQR_TIPO' => 'required|string',
+        'FECHA_SOLICITUD' => 'required|valid_date',
+        'FECHA_RESPUESTA' => 'permit_empty|valid_date',
+        'RESPUESTA' => 'permit_empty|string',
+    ];
 
-
-    // Validation
-    protected $validationRules      = [];
-    protected $validationMessages   = [];
-    protected $skipValidation       = false;
-    protected $cleanValidationRules = true;
-
-    // Callbacks
-    protected $allowCallbacks = true;
-    protected $beforeInsert   = [];
-    protected $afterInsert    = [];
-    protected $beforeUpdate   = [];
-    protected $afterUpdate    = [];
-    protected $beforeFind     = [];
-    protected $afterFind      = [];
-    protected $beforeDelete   = [];
-    protected $afterDelete    = [];
+    protected $validationMessages = [];
+    protected $skipValidation     = false;
 }
