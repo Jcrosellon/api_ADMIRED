@@ -12,10 +12,11 @@ class Cuota extends BaseController
     {
         $cuotaModel = new CuotaModel();
         $data = [
-            'FECHA' => $this->request->getPost('FECHA'),
+            'FECHA_MES' => $this->request->getPost('FECHA_MES'),
             'ESTADO' => $this->request->getPost('ESTADO'),
-            'FECHA_LIMITE' => $this->request->getPost('FECHA_LIMITE'),
-            'PRECIO' => $this->request->getPost('PRECIO'),
+            'VALOR' => $this->request->getPost('VALOR'),
+            'NO_APTO' => $this->request->getPost('NO_APTO'),
+            'FECHA_PAGO' => $this->request->getPost('FECHA_PAGO'),
         ];
 
         if ($cuotaModel->insert($data)) {
@@ -36,18 +37,18 @@ class Cuota extends BaseController
     }
 
     public function index()
-{
-    $cuotaModel = new CuotaModel();
-    $cuota = $cuotaModel->findAll();
+    {
+        $cuotaModel = new CuotaModel();
+        $cuota = $cuotaModel->findAll();
 
-    $dataResult = [
-        "data" => $cuota,
-        "message" => 'Lista de cuotas',
-        "response" => ResponseInterface::HTTP_OK,
-    ];
+        $dataResult = [
+            "data" => $cuota,
+            "message" => 'Lista de cuotas',
+            "response" => ResponseInterface::HTTP_OK,
+        ];
 
-    return $this->response->setJSON($dataResult);
-}
+        return $this->response->setJSON($dataResult);
+    }
 
 
 
@@ -74,81 +75,83 @@ class Cuota extends BaseController
     }
 
     public function update($id)
-{
-    $cuotaModel = new CuotaModel();
+    {
+        $cuotaModel = new CuotaModel();
 
-    // Obtener el usuario actual
-    $cuota = $cuotaModel->find($id);
+        // Obtener la cuota actual
+        $cuota = $cuotaModel->find($id);
 
-    // Verificar si el usuario existe
-    if ($cuota) {
-        // Obtener los datos del formulario
-        $data = [
-            'FECHA' => $this->request->getVar('FECHA') ?? $cuota['FECHA'],
-            'ESTADO' => $this->request->getVar('ESTADO') ?? $cuota['ESTADO'],
-            'FECHA_LIMITE' => $this->request->getVar('FECHA_LIMITE') ?? $cuota['FECHA_LIMITE'],
-            'PRECIO' => $this->request->getVar('PRECIO') ?? $cuota['PRECIO'],
-        ];
+        // Verificar si la cuota existe
+        if ($cuota) {
+            // Obtener los datos del cuerpo de la solicitud como JSON
+            $data = $this->request->getJSON(true);
 
-        // Actualizar el usuario en la base de datos
-        if ($cuotaModel->update($id, $data)) {
-            $dataResult = [
-                "data" => $data,
-                "message" => 'Unidad actualizado',
-                "response" => ResponseInterface::HTTP_OK,
-            ];
+            // Verificar si al menos un dato fue proporcionado
+            if (!empty($data)) {
+                // Actualizar la cuota en la base de datos
+                if ($cuotaModel->update($id, $data)) {
+                    $dataResult = [
+                        "data" => $data,
+                        "message" => 'Unidad actualizada',
+                        "response" => ResponseInterface::HTTP_OK,
+                    ];
+                } else {
+                    $dataResult = [
+                        "data" => '',
+                        "message" => 'Error al actualizar unidad',
+                        "response" => ResponseInterface::HTTP_INTERNAL_SERVER_ERROR,
+                    ];
+                }
+            } else {
+                $dataResult = [
+                    "data" => '',
+                    "message" => 'No data provided',
+                    "response" => ResponseInterface::HTTP_BAD_REQUEST,
+                ];
+            }
         } else {
             $dataResult = [
                 "data" => '',
-                "message" => 'Error al actualizar unidad',
-                "response" => ResponseInterface::HTTP_INTERNAL_SERVER_ERROR,
+                "message" => 'Unidad no encontrada',
+                "response" => ResponseInterface::HTTP_NOT_FOUND,
             ];
         }
-    } else {
-        $dataResult = [
-            "data" => '',
-            "message" => 'Unidad no encontrado',
-            "response" => ResponseInterface::HTTP_NOT_FOUND,
-        ];
+
+        return $this->response->setJSON($dataResult);
     }
 
-    return $this->response->setJSON($dataResult);
-}
 
-public function delete($id)
-{
-    $cuotaModel = new CuotaModel();
+    public function delete($id)
+    {
+        $cuotaModel = new CuotaModel();
 
-    // Obtener el usuario actual
-    $cuota = $cuotaModel->find($id);
+        // Obtener el usuario actual
+        $cuota = $cuotaModel->find($id);
 
-    // Verificar si el usuario existe
-    if ($cuota) {
-        // Eliminar el usuario de la base de datos
-        if ($cuotaModel->delete($id)) {
-            $dataResult = [
-                "data" => $cuota,
-                "message" => 'Unidad eliminada correctamente',
-                "response" => ResponseInterface::HTTP_OK,
-            ];
+        // Verificar si el usuario existe
+        if ($cuota) {
+            // Eliminar el usuario de la base de datos
+            if ($cuotaModel->delete($id)) {
+                $dataResult = [
+                    "data" => $cuota,
+                    "message" => 'Unidad eliminada correctamente',
+                    "response" => ResponseInterface::HTTP_OK,
+                ];
+            } else {
+                $dataResult = [
+                    "data" => '',
+                    "message" => 'Error al eliminar unidad',
+                    "response" => ResponseInterface::HTTP_INTERNAL_SERVER_ERROR,
+                ];
+            }
         } else {
             $dataResult = [
                 "data" => '',
-                "message" => 'Error al eliminar unidad',
-                "response" => ResponseInterface::HTTP_INTERNAL_SERVER_ERROR,
+                "message" => 'Unidad no encontrado',
+                "response" => ResponseInterface::HTTP_NOT_FOUND,
             ];
         }
-    } else {
-        $dataResult = [
-            "data" => '',
-            "message" => 'Unidad no encontrado',
-            "response" => ResponseInterface::HTTP_NOT_FOUND,
-        ];
+
+        return $this->response->setJSON($dataResult);
     }
-
-    return $this->response->setJSON($dataResult);
-}
-
-
-
 }
