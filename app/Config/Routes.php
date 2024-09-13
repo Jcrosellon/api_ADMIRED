@@ -27,6 +27,24 @@ $routes->group("api", ['filter' => 'cors'], function ($routes) {
     $routes->options('usuarios', '\Dummy');
     $routes->options('usuarios/(:any)', '\Dummy');
 
+    // Reservas
+    $routes->post("reservas/create", "Reservas::create");
+    $routes->get("reservas/show/(:num)", "Reservas::show/$1");
+    $routes->get("reservas", "Reservas::index");
+    $routes->put("reservas/update/(:num)", "Reservas::update/$1");
+    $routes->delete("reservas/delete/(:num)", "Reservas::delete/$1");
+    $routes->options('reservas', '\Dummy');
+    $routes->options('reservas/(:any)', '\Dummy');
+
+    // Zonas Comunes
+    $routes->post("zonas_comunes/create", "ZonasComunes::create");
+    $routes->get("zonas_comunes/show/(:num)", "ZonasComunes::show/$1");
+    $routes->get("zonas_comunes", "ZonasComunes::index");
+    $routes->put("zonas_comunes/update/(:num)", "ZonasComunes::update/$1");
+    $routes->delete("zonas_comunes/delete/(:num)", "ZonasComunes::delete/$1");
+    $routes->options('zonas_comunes', '\Dummy');
+    $routes->options('zonas_comunes/(:any)', '\Dummy');
+
     // PQR
     $routes->post("pqr/create", "Pqr::create");
     $routes->get("pqr/show/(:num)", "Pqr::show/$1");
@@ -35,7 +53,7 @@ $routes->group("api", ['filter' => 'cors'], function ($routes) {
     $routes->delete("pqr/delete/(:num)", "Pqr::delete/$1");
     $routes->options('pqr', '\Dummy');
     $routes->options('pqr/(:any)', '\Dummy');
-    
+
 
     // Cuota Administracion
     $routes->post("cuotas_administracion/create", "Cuota::create");
@@ -45,8 +63,4 @@ $routes->group("api", ['filter' => 'cors'], function ($routes) {
     $routes->delete("cuotas_administracion/delete/(:num)", "Cuota::delete/$1");
     $routes->options('cuotas_administracion', '\Dummy');
     $routes->options('cuotas_administracion/(:any)', '\Dummy');
-
-
 });
-
-
