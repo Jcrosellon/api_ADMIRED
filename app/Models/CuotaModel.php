@@ -15,19 +15,11 @@ class CuotaModel extends Model
     protected $protectFields    = true;
     protected $allowedFields    = ['FECHA_MES', 'ESTADO', 'VALOR', 'NO_APTO', 'FECHA_PAGO'];
 
-    protected $validationRules      = [];
-    protected $validationMessages   = [];
-    protected $skipValidation       = false;
-    protected $cleanValidationRules = true;
-
-    // Callbacks
-    protected $allowCallbacks = true;
-    protected $beforeInsert   = [];
-    protected $afterInsert    = [];
-    protected $beforeUpdate   = [];
-    protected $afterUpdate    = [];
-    protected $beforeFind     = [];
-    protected $afterFind      = [];
-    protected $beforeDelete   = [];
-    protected $afterDelete    = [];
+    protected $validationRules = [
+        'FECHA_MES' => 'required|valid_date',
+        'ESTADO' => 'required|string',
+        'VALOR' => 'required|decimal',
+        'NO_APTO' => 'permit_empty|string',
+        'FECHA_PAGO' => 'permit_empty|valid_date',
+    ];
 }

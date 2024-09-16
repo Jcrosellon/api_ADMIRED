@@ -35,15 +35,15 @@ $routes->group("api", ['filter' => 'cors'], function ($routes) {
     $routes->delete("reservas/delete/(:num)", "Reservas::delete/$1");
     $routes->options('reservas', '\Dummy');
     $routes->options('reservas/(:any)', '\Dummy');
+    // Áreas Comunes
+    $routes->post("areas_comunes/create", "AreasComunes::create");
+    $routes->get("areas_comunes/show/(:num)", "AreasComunes::show/$1");
+    $routes->get("areas_comunes", "AreasComunes::index");
+    $routes->put("areas_comunes/update/(:num)", "AreasComunes::update/$1");
+    $routes->delete("areas_comunes/delete/(:num)", "AreasComunes::delete/$1");
+    $routes->options('areas_comunes', '\Dummy');
+    $routes->options('areas_comunes/(:any)', '\Dummy');
 
-    // Zonas Comunes
-    $routes->post("zonas_comunes/create", "ZonasComunes::create");
-    $routes->get("zonas_comunes/show/(:num)", "ZonasComunes::show/$1");
-    $routes->get("zonas_comunes", "ZonasComunes::index");
-    $routes->put("zonas_comunes/update/(:num)", "ZonasComunes::update/$1");
-    $routes->delete("zonas_comunes/delete/(:num)", "ZonasComunes::delete/$1");
-    $routes->options('zonas_comunes', '\Dummy');
-    $routes->options('zonas_comunes/(:any)', '\Dummy');
 
     // PQR
     $routes->post("pqr/create", "Pqr::create");
@@ -54,13 +54,26 @@ $routes->group("api", ['filter' => 'cors'], function ($routes) {
     $routes->options('pqr', '\Dummy');
     $routes->options('pqr/(:any)', '\Dummy');
 
+    // PQR Tipo
+    $routes->post("pqr_tipos/create", "PqrTipo::create");
+    $routes->get("pqr_tipos/show/(:num)", "PqrTipo::show/$1");
+    $routes->get("pqr_tipos", "PqrTipo::index"); // Este método obtiene todos los tipos de PQR
+    $routes->put("pqr_tipos/update/(:num)", "PqrTipo::update/$1");
+    $routes->delete("pqr_tipos/delete/(:num)", "PqrTipo::delete/$1");
+    $routes->options('pqr_tipos', '\Dummy');
+    $routes->options('pqr_tipos/(:any)', '\Dummy');
+
+
 
     // Cuota Administracion
-    $routes->post("cuotas_administracion/create", "Cuota::create");
-    $routes->get('cuotas_administracion/show/(:num)', 'Cuota::show/$1');
-    $routes->get("cuotas_administracion", "Cuota::index");
-    $routes->put('cuotas_administracion/update/(:num)', 'Cuota::update/$1');
-    $routes->delete("cuotas_administracion/delete/(:num)", "Cuota::delete/$1");
-    $routes->options('cuotas_administracion', '\Dummy');
-    $routes->options('cuotas_administracion/(:any)', '\Dummy');
+    $routes->group("api", ['filter' => 'cors'], function ($routes) {
+        // Cuota Administracion
+        $routes->post("cuotas_administracion/create", "Cuota::create");
+        $routes->get('cuotas_administracion/show/(:num)', 'Cuota::show/$1');
+        $routes->get("cuotas_administracion", "Cuota::index");
+        $routes->put('cuotas_administracion/update/(:num)', 'Cuota::update/$1');
+        $routes->delete("cuotas_administracion/delete/(:num)", "Cuota::delete/$1");
+        $routes->options('cuotas_administracion', '\Dummy');
+        $routes->options('cuotas_administracion/(:any)', '\Dummy');
+    });
 });

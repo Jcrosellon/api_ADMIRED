@@ -17,7 +17,7 @@ class PqrModel extends Model
         'DETALLE',
         'ESTADO_ID',
         'USUARIO_ID',
-        'PQR_TIPO',
+        'PQR_TIPO_ID',  // Actualizado aquí
         'FECHA_SOLICITUD',
         'FECHA_RESPUESTA',
         'RESPUESTA',
@@ -27,7 +27,7 @@ class PqrModel extends Model
         'DETALLE' => 'required|string',
         'ESTADO_ID' => 'required|numeric',
         'USUARIO_ID' => 'required|numeric',
-        'PQR_TIPO' => 'required|string',
+        'PQR_TIPO_ID' => 'required|numeric',  // Actualizado aquí
         'FECHA_SOLICITUD' => 'required|valid_date',
         'FECHA_RESPUESTA' => 'permit_empty|valid_date',
         'RESPUESTA' => 'permit_empty|string',

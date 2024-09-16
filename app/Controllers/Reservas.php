@@ -4,6 +4,7 @@ namespace App\Controllers;
 
 use App\Models\ReservasModel;
 use CodeIgniter\RESTful\ResourceController;
+use Config\Validation;
 
 class Reservas extends ResourceController
 {
@@ -12,7 +13,13 @@ class Reservas extends ResourceController
 
     public function create()
     {
-        $data = $this->request->getJSON(true); // Obtener como array
+        $data = $this->request->getJSON(true);
+
+        // Validar datos
+        $validation = \Config\Services::validation();
+        if (!$validation->run($data, 'reservas')) {
+            return $this->fail($validation->getErrors());
+        }
 
         // Verifica la codificación de los datos antes de insertarlos
         $data = array_map(function ($value) {

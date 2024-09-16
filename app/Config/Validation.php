@@ -41,4 +41,22 @@ class Validation extends BaseConfig
     // --------------------------------------------------------------------
     // Rules
     // --------------------------------------------------------------------
+    public $pqr = [
+        'DETALLE' => 'required|string',
+        'ESTADO_ID' => 'required|numeric',
+        'USUARIO_ID' => 'required|numeric',
+        'PQR_TIPO_ID' => 'required|numeric',  // Actualizado aquí
+        'FECHA_SOLICITUD' => 'required|valid_date',
+        'FECHA_RESPUESTA' => 'permit_empty|valid_date',
+        'RESPUESTA' => 'permit_empty|string',
+    ];
+
+    // Validation.php
+    public $cuota = [
+        'FECHA_MES' => 'required|valid_date',
+        'ESTADO' => 'required|string',
+        'VALOR' => 'required|decimal',
+        'NO_APTO' => 'permit_empty|string',
+        'FECHA_PAGO' => 'permit_empty|valid_date',
+    ];
 }
