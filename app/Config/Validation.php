@@ -41,6 +41,17 @@ class Validation extends BaseConfig
     // --------------------------------------------------------------------
     // Rules
     // --------------------------------------------------------------------
+
+    public $reservas = [
+        'FECHA_RESERVA' => 'required|valid_date',
+        'ID_AREA_COMUN' => 'required|integer',
+        'ESTADO_RESERVA' => 'required|string',
+        'ID_USUARIO' => 'required|integer',
+        'OBSERVACION_ENTREGA' => 'permit_empty|string',
+        'OBSERVACION_RECIBE' => 'permit_empty|string',
+        'VALOR' => 'required|decimal',
+    ];
+
     public $pqr = [
         'DETALLE' => 'required|string',
         'ESTADO_ID' => 'required|numeric',

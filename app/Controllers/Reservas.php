@@ -4,7 +4,7 @@ namespace App\Controllers;
 
 use App\Models\ReservasModel;
 use CodeIgniter\RESTful\ResourceController;
-use Config\Validation;
+use Config\Services;
 
 class Reservas extends ResourceController
 {
@@ -16,9 +16,10 @@ class Reservas extends ResourceController
         $data = $this->request->getJSON(true);
 
         // Validar datos
-        $validation = \Config\Services::validation();
-        if (!$validation->run($data, 'reservas')) {
-            return $this->fail($validation->getErrors());
+        $validation = Services::validation();
+        if (! $this->validate($validation->getRuleGroup('reservas'))) {
+            $errors = $validation->getErrors();
+            return $this->response->setJSON(['errors' => $errors])->setStatusCode(400);
         }
 
         // Verifica la codificación de los datos antes de insertarlos
@@ -29,7 +30,26 @@ class Reservas extends ResourceController
         if ($this->model->insert($data)) {
             return $this->respondCreated(['status' => 'success']);
         } else {
+            // Agrega un mensaje de error para más detalles
+            $error = $this->model->errors();
+            log_message('error', 'Error al insertar la reserva: ' . print_r($error, true));
             return $this->failServerError('No se pudo crear la reserva');
         }
+    }
+
+
+
+    private function getValidationRules()
+    {
+        // Reemplaza este array con las reglas de validación de tu grupo 'reservas'
+        return [
+            'FECHA_RESERVA' => 'required|valid_date',
+            'ID_AREA_COMUN' => 'required|integer',
+            'ESTADO_RESERVA' => 'required|string',
+            'ID_USUARIO' => 'required|integer',
+            'OBSERVACION_ENTREGA' => 'permit_empty|string',
+            'OBSERVACION_RECIBE' => 'permit_empty|string',
+            'VALOR' => 'required|decimal',
+        ];
     }
 }

@@ -45,15 +45,17 @@ class Login extends BaseController
             "iat" => $iat,  // Tiempo de emisión
             "exp" => $exp,  // Tiempo de expiración
             "email" => $user['email'],  // Email del usuario
+            "userId" => $user['id'] // Incluye el userId en el payload
         ];
 
         // Generar el token
         $token = JWT::encode($payload, $key, 'HS256');
 
-        // Respuesta de éxito con el token
+        // Respuesta de éxito con el token y el userId
         $response = [
             'message' => 'Login Successful',
-            'token' => $token
+            'token' => $token,
+            'userId' => $user['id'] // Incluye el userId en la respuesta
         ];
 
         return $this->respond($response, 200);
