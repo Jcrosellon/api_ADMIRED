@@ -64,14 +64,12 @@ $routes->group("api", ['filter' => 'cors'], function ($routes) {
     $routes->options('pqr_tipos/(:any)', '\Dummy');
 
     // Cuota Administracion
-    $routes->group("api", ['filter' => 'cors'], function ($routes) {
-        // Cuota Administracion
-        $routes->post("cuotas_administracion/create", "Cuota::create");
-        $routes->get('cuotas_administracion/show/(:num)', 'Cuota::show/$1');
-        $routes->get("cuotas_administracion", "Cuota::index");
-        $routes->put('cuotas_administracion/update/(:num)', 'Cuota::update/$1');
-        $routes->delete("cuotas_administracion/delete/(:num)", "Cuota::delete/$1");
-        $routes->options('cuotas_administracion', '\Dummy');
-        $routes->options('cuotas_administracion/(:any)', '\Dummy');
-    });
+    $routes->post("cuotas_administracion/create", "Cuota::create");
+    $routes->get('cuotas_administracion/show/(:num)', 'Cuota::show/$1');
+    $routes->get("cuotas_administracion", "Cuota::index");
+    $routes->put('cuotas_administracion/update/(:num)', 'Cuota::update/$1');
+    $routes->delete("cuotas_administracion/delete/(:num)", "Cuota::delete/$1");
+    $routes->get('cuotas_administracion/user/(:num)', 'Cuota::showByUser/$1'); // Nueva ruta para obtener cuota por usuario
+    $routes->options('cuotas_administracion', '\Dummy');
+    $routes->options('cuotas_administracion/(:any)', '\Dummy');
 });
