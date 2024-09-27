@@ -76,15 +76,27 @@ class Usuarios extends ResourceController
         }
     }
 
-
-
-
     public function delete($id = null)
     {
-        if ($this->model->delete($id)) {
-            return $this->respondDeleted(['id' => $id]);
+        // Verifica si se proporcionó un ID (permitimos el ID 0)
+        if (!isset($id)) {
+            return $this->failValidationErrors('ID not provided.');
         }
 
-        return $this->failNotFound('User not found');
+        // Verifica si el usuario existe antes de intentar eliminarlo
+        $user = $this->model->find($id);
+        if (!$user) {
+            return $this->failNotFound('User not found.');
+        }
+
+        // Intenta eliminar el usuario
+        if ($this->model->delete(['ID' => $id])) {
+            return $this->respondDeleted([
+                'id' => $id,
+                'message' => 'User deleted successfully.'
+            ]);
+        }
+
+        return $this->failServerError('Failed to delete the user.');
     }
 }

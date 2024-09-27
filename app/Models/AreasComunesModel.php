@@ -13,8 +13,7 @@ class AreasComunesModel extends Model
         'DESCRIPCION',
         'IMAGEN_URL',
         'PRECIO',
-        'DISPONIBILIDAD',
-        'IMAGEN'
+        'DISPONIBILIDAD'
     ];
 
     protected $validationRules = [
@@ -22,8 +21,7 @@ class AreasComunesModel extends Model
         'DESCRIPCION' => 'permit_empty|string',
         'IMAGEN_URL' => 'permit_empty|valid_url|max_length[255]',
         'PRECIO' => 'permit_empty|decimal',
-        'DISPONIBILIDAD' => 'permit_empty|integer',
-        'IMAGEN' => 'permit_empty'
+        'DISPONIBILIDAD' => 'permit_empty|integer'
     ];
 
     protected $validationMessages = [];

@@ -13,7 +13,7 @@ class CuotaModel extends Model
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
-    protected $allowedFields    = ['FECHA_MES', 'ESTADO', 'VALOR', 'NO_APTO', 'FECHA_PAGO'];
+    protected $allowedFields    = ['FECHA_MES', 'ESTADO', 'VALOR', 'NO_APTO', 'FECHA_PAGO', 'UNIDAD_RESIDENCIAL_ID'];
 
     protected $validationRules = [
         'FECHA_MES' => 'required|valid_date',

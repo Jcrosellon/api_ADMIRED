@@ -25,11 +25,6 @@ class UsuariosModel extends Model
         'ROL_ID',
         'TORRE',
         'APTO',
-        'PQR_ID',
-        'RESIDENTES_ID',
-        'CUOTAS_ADMIN_ID',
-        'UNIDAD_RESIDENCIAL_ID',
-        'AREA_COMUN_ID'
     ];
 
     protected $validationRules = [

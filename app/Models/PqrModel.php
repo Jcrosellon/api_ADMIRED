@@ -12,27 +12,18 @@ class PqrModel extends Model
     protected $useAutoIncrement = true;
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
-    protected $protectFields    = true;
-    protected $allowedFields    = [
-        'DETALLE',
-        'ESTADO_ID',
-        'USUARIO_ID',
-        'PQR_TIPO_ID',  // Actualizado aquí
-        'FECHA_SOLICITUD',
-        'FECHA_RESPUESTA',
-        'RESPUESTA',
-    ];
+    protected $allowedFields    = ['DETALLE', 'ESTADO_ID', 'USUARIO_ID', 'PQR_TIPO_ID', 'FECHA_SOLICITUD', 'FECHA_RESPUESTA', 'RESPUESTA'];
 
     protected $validationRules = [
-        'DETALLE' => 'required|string',
-        'ESTADO_ID' => 'required|numeric',
-        'USUARIO_ID' => 'required|numeric',
-        'PQR_TIPO_ID' => 'required|numeric',  // Actualizado aquí
+        'DETALLE' => 'required',
+        'ESTADO_ID' => 'required|integer',
+        'USUARIO_ID' => 'required|integer',
+        'PQR_TIPO_ID' => 'required|integer',
         'FECHA_SOLICITUD' => 'required|valid_date',
-        'FECHA_RESPUESTA' => 'permit_empty|valid_date',
-        'RESPUESTA' => 'permit_empty|string',
+        'FECHA_RESPUESTA' => 'valid_date',
+        'RESPUESTA' => 'permit_empty',
     ];
 
     protected $validationMessages = [];
-    protected $skipValidation     = false;
+    protected $skipValidation = false;
 }

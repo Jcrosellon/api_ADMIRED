@@ -52,4 +52,65 @@ class Reservas extends ResourceController
             'VALOR' => 'required|decimal',
         ];
     }
+
+    public function show($id = null)
+    {
+        $reservasModel = new ReservasModel();
+
+        // Verifica si la reserva existe
+        $reserva = $reservasModel->find($id);
+
+        if (!$reserva) {
+            return $this->failNotFound('Reserva no encontrada');
+        }
+
+        return $this->respond($reserva);
+    }
+
+    public function update($id = null)
+    {
+        $data = $this->request->getJSON(true);
+
+        // Verifica si la reserva existe
+        if (!$this->model->find($id)) {
+            return $this->failNotFound('Reserva no encontrada');
+        }
+
+        // Validar datos
+        $validation = Services::validation();
+        if (! $this->validate($validation->getRuleGroup('reservas'))) {
+            $errors = $validation->getErrors();
+            return $this->response->setJSON(['errors' => $errors])->setStatusCode(400);
+        }
+
+        // Verifica la codificación de los datos antes de actualizarlos
+        $data = array_map(function ($value) {
+            return mb_convert_encoding($value, 'UTF-8', 'auto');
+        }, $data);
+
+        if ($this->model->update($id, $data)) {
+            return $this->respondUpdated(['status' => 'success']);
+        } else {
+            // Agrega un mensaje de error para más detalles
+            $error = $this->model->errors();
+            log_message('error', 'Error al actualizar la reserva: ' . print_r($error, true));
+            return $this->failServerError('No se pudo actualizar la reserva');
+        }
+    }
+
+    public function delete($id = null)
+    {
+        // Verifica si la reserva existe
+        if (!$this->model->find($id)) {
+            return $this->failNotFound('Reserva no encontrada');
+        }
+
+        if ($this->model->delete($id)) {
+            return $this->respondDeleted(['status' => 'success']);
+        } else {
+            // Agrega un mensaje de error para más detalles
+            log_message('error', 'Error al eliminar la reserva con ID: ' . $id);
+            return $this->failServerError('No se pudo eliminar la reserva');
+        }
+    }
 }

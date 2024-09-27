@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subir Imagen</title>
+</head>
+
+<body>
+    <h2>Subir Imagen a la Base de Datos</h2>
+    <form action="imagen.php" method="post" enctype="multipart/form-data">
+        <!-- Campo para el nombre -->
+        <label for="nombre">Nombre de la Zona Común:</label>
+        <input type="text" name="nombre" id="nombre" required>
+        <br><br>
+
+        <!-- Campo para la descripción -->
+        <label for="description">Descripción:</label>
+        <textarea name="description" id="description" rows="4" required></textarea>
+        <br><br>
+
+        <!-- Campo para el precio -->
+        <label for="precio">Precio:</label>
+        <input type="number" step="0.01" name="precio" id="precio" required>
+        <br><br>
+
+        <!-- Campo para la disponibilidad -->
+        <label for="disponibilidad">Disponibilidad (1 = Disponible, 0 = No disponible):</label>
+        <input type="number" name="disponibilidad" id="disponibilidad" min="0" max="1" required>
+        <br><br>
+
+        <!-- Campo para seleccionar la imagen -->
+        <label for="image">Selecciona una imagen:</label>
+        <input type="file" name="image" id="image" accept="image/*" required>
+        <br><br>
+
+        <!-- Botón para enviar el formulario -->
+        <input type="submit" value="Subir Imagen">
+    </form>
+</body>
+
+</html>
