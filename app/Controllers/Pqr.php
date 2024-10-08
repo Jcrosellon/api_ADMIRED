@@ -115,16 +115,19 @@ class Pqr extends BaseController
             // Configura el correo
             $email->setFrom('joserosellonl@gmail.com', 'admired'); // Cambia esto por tu correo y el nombre del remitente
             $email->setTo($user['email']);
-            $nombre = isset($user['nombre']) ? $user['nombre'] : 'Usuario';
+            $nombre = isset($user['NOMBRE']) ? $user['NOMBRE'] : 'Usuario'; // Asegúrate de que el campo sea el correcto
             $email->setSubject('Respuesta a su PQR');
             $email->setMessage("Hola {$nombre},\n\nHemos respondido a su PQR:\n\n{$data['DETALLE']}\n\nRespuesta:\n{$data['RESPUESTA']}\n\nGracias por contactarnos.");
 
             // Envia el correo
             if ($email->send()) {
-                echo "Correo enviado correctamente";
+                log_message('info', "Correo enviado correctamente a {$user['email']}");
             } else {
-                echo "Error al enviar el correo: " . $email->printDebugger();
+                log_message('error', "Error al enviar el correo: " . $email->printDebugger());
+                // Puedes lanzar una excepción si quieres manejarlo más arriba en la pila
             }
+        } else {
+            log_message('warning', "No se encontró el usuario o el correo.");
         }
     }
 }

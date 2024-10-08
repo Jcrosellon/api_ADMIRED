@@ -11,34 +11,44 @@ class ReservasModel extends Model
 
     protected $allowedFields = [
         'FECHA_RESERVA',
+        'FECHA_FIN',
         'ID_AREA_COMUN',
-        'ESTADO_RESERVA',
         'ID_USUARIO',
         'OBSERVACION_ENTREGA',
         'OBSERVACION_RECIBE',
-        'VALOR'
+        'VALOR',
+        'ID_ESTADO_RESERVA'  // Asegúrate de que este campo esté aquí
     ];
 
+
     protected $validationRules = [
-        'FECHA_RESERVA' => 'required|valid_date',
+        'FECHA_RESERVA' => 'required|valid_date[Y-m-d H:i:s]',
+        'FECHA_FIN' => 'required|valid_date[Y-m-d H:i:s]',
         'ID_AREA_COMUN' => 'required|integer',
-        'ESTADO_RESERVA' => 'required|string',
         'ID_USUARIO' => 'required|integer',
         'OBSERVACION_ENTREGA' => 'permit_empty|string',
         'OBSERVACION_RECIBE' => 'permit_empty|string',
-        'VALOR' => 'required|decimal'
+        'VALOR' => 'required|decimal',
+        'ID_ESTADO_RESERVA' => 'required|integer',
     ];
+
+
+
 
     protected $validationMessages = [
         'FECHA_RESERVA' => [
             'required' => 'La fecha de reserva es obligatoria.',
             'valid_date' => 'La fecha de reserva no es válida.'
         ],
+        'FECHA_FIN' => [
+            'required' => 'La fecha de fin es obligatoria.',
+            'valid_date' => 'La fecha de fin no es válida.',
+            'greater_than' => 'La fecha de fin debe ser posterior a la fecha de inicio.'
+        ],
         'ID_AREA_COMUN' => [
             'required' => 'El área común es obligatoria.',
             'integer' => 'El área común debe ser un número entero.'
         ],
-        // Agrega mensajes para las otras reglas si es necesario
     ];
 
     protected $skipValidation = false;

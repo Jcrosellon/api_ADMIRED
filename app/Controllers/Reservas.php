@@ -16,10 +16,34 @@ class Reservas extends ResourceController
         $data = $this->request->getJSON(true);
 
         // Validar datos
-        $validation = Services::validation();
-        if (! $this->validate($validation->getRuleGroup('reservas'))) {
-            $errors = $validation->getErrors();
+        if (!$this->validate($this->model->validationRules)) {
+            $errors = $this->validator->getErrors();
             return $this->response->setJSON(['errors' => $errors])->setStatusCode(400);
+        }
+
+        // Comprobar si FECHA_FIN es mayor que FECHA_RESERVA
+        if (new \DateTime($data['FECHA_FIN']) <= new \DateTime($data['FECHA_RESERVA'])) {
+            return $this->response->setJSON(['errors' => ['FECHA_FIN' => 'La fecha de fin debe ser posterior a la fecha de inicio.']])->setStatusCode(400);
+        }
+
+        // Comprobar duración de la reserva
+        $fechaInicio = new \DateTime($data['FECHA_RESERVA']);
+        $fechaFin = new \DateTime($data['FECHA_FIN']);
+        $intervalo = $fechaInicio->diff($fechaFin);
+
+        // Validar que la duración sea máxima de 4 horas
+        if ($intervalo->h > 4 || ($intervalo->h == 4 && $intervalo->i > 0)) {
+            return $this->response->setJSON(['error' => 'La duración de la reserva no puede ser mayor a 4 horas.'])->setStatusCode(409);
+        }
+
+        // Verificar si ya hay reservas en ese rango
+        $conflicto = $this->model->where('ID_AREA_COMUN', $data['ID_AREA_COMUN'])
+            ->where('FECHA_RESERVA <', $data['FECHA_FIN'])  // Modificado
+            ->where('FECHA_FIN >', $data['FECHA_RESERVA'])  // Modificado
+            ->first();
+
+        if ($conflicto) {
+            return $this->response->setJSON(['error' => 'Ya existe una reserva en este horario para el área común seleccionada.'])->setStatusCode(409);
         }
 
         // Verifica la codificación de los datos antes de insertarlos
@@ -27,10 +51,14 @@ class Reservas extends ResourceController
             return mb_convert_encoding($value, 'UTF-8', 'auto');
         }, $data);
 
+        // Asegúrate de incluir ID_ESTADO_RESERVA al insertar
+        if (!isset($data['ID_ESTADO_RESERVA'])) {
+            $data['ID_ESTADO_RESERVA'] = 1; // Valor predeterminado
+        }
+
         if ($this->model->insert($data)) {
             return $this->respondCreated(['status' => 'success']);
         } else {
-            // Agrega un mensaje de error para más detalles
             $error = $this->model->errors();
             log_message('error', 'Error al insertar la reserva: ' . print_r($error, true));
             return $this->failServerError('No se pudo crear la reserva');
@@ -39,26 +67,11 @@ class Reservas extends ResourceController
 
 
 
-    private function getValidationRules()
-    {
-        // Reemplaza este array con las reglas de validación de tu grupo 'reservas'
-        return [
-            'FECHA_RESERVA' => 'required|valid_date',
-            'ID_AREA_COMUN' => 'required|integer',
-            'ESTADO_RESERVA' => 'required|string',
-            'ID_USUARIO' => 'required|integer',
-            'OBSERVACION_ENTREGA' => 'permit_empty|string',
-            'OBSERVACION_RECIBE' => 'permit_empty|string',
-            'VALOR' => 'required|decimal',
-        ];
-    }
 
     public function show($id = null)
     {
-        $reservasModel = new ReservasModel();
-
         // Verifica si la reserva existe
-        $reserva = $reservasModel->find($id);
+        $reserva = $this->model->find($id);
 
         if (!$reserva) {
             return $this->failNotFound('Reserva no encontrada');
@@ -78,7 +91,7 @@ class Reservas extends ResourceController
 
         // Validar datos
         $validation = Services::validation();
-        if (! $this->validate($validation->getRuleGroup('reservas'))) {
+        if (!$this->validate($validation->getRuleGroup('reservas'))) {
             $errors = $validation->getErrors();
             return $this->response->setJSON(['errors' => $errors])->setStatusCode(400);
         }
