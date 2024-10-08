@@ -58,6 +58,27 @@ class Pqr extends BaseController
         }
     }
 
+    public function show($id)
+    {
+        $pqrModel = new PqrModel();
+        $pqr = $pqrModel->find($id);
+
+        if ($pqr) {
+            return $this->response->setJSON([
+                "data" => $pqr,
+                "message" => 'PQR encontrado',
+                "response" => ResponseInterface::HTTP_OK,
+            ]);
+        } else {
+            return $this->response->setJSON([
+                "data" => '',
+                "message" => 'PQR no encontrado',
+                "response" => ResponseInterface::HTTP_NOT_FOUND,
+            ]);
+        }
+    }
+
+
     public function update($id)
     {
         $pqrModel = new PqrModel();
