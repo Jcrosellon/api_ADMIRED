@@ -20,7 +20,6 @@ class ReservasModel extends Model
         'ID_ESTADO_RESERVA'  // Asegúrate de que este campo esté aquí
     ];
 
-
     protected $validationRules = [
         'FECHA_RESERVA' => 'required|valid_date[Y-m-d H:i:s]',
         'FECHA_FIN' => 'required|valid_date[Y-m-d H:i:s]',
@@ -31,9 +30,6 @@ class ReservasModel extends Model
         'VALOR' => 'required|decimal',
         'ID_ESTADO_RESERVA' => 'required|integer',
     ];
-
-
-
 
     protected $validationMessages = [
         'FECHA_RESERVA' => [
@@ -52,4 +48,10 @@ class ReservasModel extends Model
     ];
 
     protected $skipValidation = false;
+
+    // Cambia la firma de este método para que coincida con la clase base
+    public function getValidationRules(array $options = []): array
+    {
+        return array_merge($this->validationRules, $options);
+    }
 }

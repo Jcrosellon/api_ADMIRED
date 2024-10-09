@@ -123,6 +123,38 @@ class Pqr extends BaseController
         }
     }
 
+    public function delete($id)
+    {
+        $pqrModel = new PqrModel();
+
+        // Verificar si el PQR existe
+        $pqr = $pqrModel->find($id);
+
+        if ($pqr) {
+            // Intentar eliminar el PQR
+            if ($pqrModel->delete($id)) {
+                return $this->response->setJSON([
+                    "data" => '',
+                    "message" => 'PQR eliminado correctamente',
+                    "response" => ResponseInterface::HTTP_OK,
+                ]);
+            } else {
+                return $this->response->setJSON([
+                    "data" => '',
+                    "message" => 'Error al eliminar el PQR',
+                    "response" => ResponseInterface::HTTP_INTERNAL_SERVER_ERROR,
+                ]);
+            }
+        } else {
+            return $this->response->setJSON([
+                "data" => '',
+                "message" => 'PQR no encontrado',
+                "response" => ResponseInterface::HTTP_NOT_FOUND,
+            ]);
+        }
+    }
+
+
     private function sendResponseEmail($data)
     {
         // Instancia del modelo de usuario para obtener el correo
