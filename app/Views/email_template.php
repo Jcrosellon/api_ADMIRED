@@ -44,16 +44,16 @@
 <body>
     <div class="container">
         <h1>Confirmación de Reserva</h1>
-        <p>Estimado <?= $nombre_usuario ?>,</p>
+        <p>Estimado <?= $nombre_usuario ?? 'Usuario desconocido' ?>,</p>
         <p>Su reserva ha sido creada con éxito. A continuación, encontrará los detalles de su reserva:</p>
 
-        <p><strong>Fecha de Reserva:</strong> <?= $fecha_reserva ?></p>
-        <p><strong>Fecha de Fin:</strong> <?= $fecha_fin ?></p>
-        <p><strong>ID Área Común:</strong> <?= $id_area_comun ?></p>
-        <p><strong>Observación Entrega:</strong> <?= $observacion_entrega ?></p>
-        <p><strong>Observación Recibe:</strong> <?= $observacion_recibe ?></p>
-        <p><strong>Valor:</strong> <?= $valor ?></p>
-        <p><strong>Estado de Reserva:</strong> <?= $estado_reserva ?></p>
+        <p><strong>Fecha de Reserva:</strong> <?= $fecha_reserva ?? 'No disponible' ?></p>
+        <p><strong>Fecha de Fin:</strong> <?= $fecha_fin ?? 'No disponible' ?></p>
+        <p><strong>ID Área Común:</strong> <?= $id_area_comun ?? 'No disponible' ?></p>
+        <p><strong>Observación Entrega:</strong> <?= $observacion_entrega ?? 'No disponible' ?></p>
+        <p><strong>Observación Recibe:</strong> <?= $observacion_recibe ?? 'No disponible' ?></p>
+        <p><strong>Valor:</strong> <?= $valor ?? 0 ?></p>
+        <p><strong>Estado de Reserva:</strong> <?= $estado_reserva ?? 'No disponible' ?></p>
 
         <p>Gracias por utilizar nuestro servicio.</p>
         <p>Atentamente,<br>El equipo de Admired</p>

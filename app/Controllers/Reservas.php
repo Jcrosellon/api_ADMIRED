@@ -3,8 +3,8 @@
 namespace App\Controllers;
 
 use App\Models\ReservasModel;
-use App\Models\UsuariosModel; // Asegúrate de tener este modelo
-use App\Models\EstadosReservaModel; // Asegúrate de tener este modelo
+use App\Models\UserModel; // Cambiado a UserModel
+use App\Models\EstadosReservaModel;
 use CodeIgniter\RESTful\ResourceController;
 use Config\Services;
 
@@ -60,28 +60,30 @@ class Reservas extends ResourceController
 
         // Insertar la reserva en la base de datos
         if ($this->model->insert($data)) {
-            // Obtener el nombre del usuario
-            $usuarioModel = new UsuariosModel();
+
+            // Obtener el nombre del usuario (modifica esto según tu estructura de datos)
+            $usuarioModel = new UserModel(); // Cambiado a UserModel
             $usuario = $usuarioModel->find($data['ID_USUARIO']);
-            $nombreUsuario = $usuario['nombre'] ?? 'Usuario desconocido';
+            $nombreUsuario = $usuario ? $usuario['email'] : 'Usuario desconocido'; // Cambiado a email, o cambia a nombre si lo agregas
 
             // Obtener el estado de la reserva
             $estadoReservaModel = new EstadosReservaModel();
             $estadoReserva = $estadoReservaModel->find($data['ID_ESTADO_RESERVA']);
-            $descripcionEstado = $estadoReserva['DESCRIPCION'] ?? 'Desconocido';
+            $descripcionEstado = $estadoReserva ? $estadoReserva['DESCRIPCION'] : 'Desconocido';
 
             // Preparar los datos del correo
             $emailData = [
-                "FECHA_RESERVA" => $data['FECHA_RESERVA'],
-                "FECHA_FIN" => $data['FECHA_FIN'],
-                "ID_AREA_COMUN" => $data['ID_AREA_COMUN'],
-                "NOMBRE_USUARIO" => $nombreUsuario,
-                "OBSERVACION_ENTREGA" => $data['OBSERVACION_ENTREGA'] ?? '',
-                "OBSERVACION_RECIBE" => $data['OBSERVACION_RECIBE'] ?? '',
-                "VALOR" => $data['VALOR'],
-                "ESTADO_RESERVA" => $descripcionEstado, // Estado de reserva en texto
-                "email_usuario" => $data['email_usuario']
+                "fecha_reserva" => $data['FECHA_RESERVA'] ?? 'No disponible',
+                "fecha_fin" => $data['FECHA_FIN'] ?? 'No disponible',
+                "id_area_comun" => $data['ID_AREA_COMUN'] ?? 'No disponible',
+                "nombre_usuario" => $nombreUsuario,
+                "observacion_entrega" => $data['OBSERVACION_ENTREGA'] ?? 'No disponible',
+                "observacion_recibe" => $data['OBSERVACION_RECIBE'] ?? 'No disponible',
+                "valor" => $data['VALOR'] ?? 0,
+                "estado_reserva" => $descripcionEstado,
+                "email_usuario" => $data['email_usuario'] // Este campo se usa para enviar el correo
             ];
+
 
             // Enviar correo de confirmación de reserva
             $this->sendEmail($data['email_usuario'], 'Confirmación de Reserva', $emailData);
@@ -97,12 +99,15 @@ class Reservas extends ResourceController
 
     public function update($id = null)
     {
+        // Obtener los datos del cuerpo de la solicitud en formato JSON
         $data = $this->request->getJSON(true);
 
+        // Verificar si la reserva existe
         if (!$this->model->find($id)) {
             return $this->failNotFound('Reserva no encontrada');
         }
 
+        // Validar los datos recibidos
         $validation = Services::validation();
         if (!$this->validate($validation->getRuleGroup('reservas'))) {
             $errors = $validation->getErrors();
@@ -114,19 +119,41 @@ class Reservas extends ResourceController
             return mb_convert_encoding($value, 'UTF-8', 'auto');
         }, $data);
 
+        // Intentar actualizar la reserva
         if ($this->model->update($id, $data)) {
+            // Obtener la reserva actualizada
+            $reservaActualizada = $this->model->find($id);
+
             // Obtener el estado de la reserva actualizado
             $estadoReservaModel = new EstadosReservaModel();
-            $estadoReserva = $estadoReservaModel->find($data['ID_ESTADO_RESERVA']);
+            $estadoReserva = $estadoReservaModel->find($reservaActualizada['ID_ESTADO_RESERVA']);
             $descripcionEstado = $estadoReserva['DESCRIPCION'] ?? 'Desconocido';
 
+            // Obtener el nombre del usuario
+            $usuarioModel = new UserModel(); // Cambiado a UserModel
+            $usuario = $usuarioModel->find($reservaActualizada['ID_USUARIO']);
+            $nombreUsuario = $usuario['email'] ?? 'Usuario desconocido'; // Cambiado a email, o cambia a nombre si lo agregas
+
+            // Preparar los datos del correo
+            $emailData = [
+                "fecha_reserva" => $reservaActualizada['FECHA_RESERVA'],
+                "fecha_fin" => $reservaActualizada['FECHA_FIN'],
+                "id_area_comun" => $reservaActualizada['ID_AREA_COMUN'],
+                "nombre_usuario" => $nombreUsuario,
+                "observacion_entrega" => $reservaActualizada['OBSERVACION_ENTREGA'] ?? '',
+                "observacion_recibe" => $reservaActualizada['OBSERVACION_RECIBE'] ?? '',
+                "valor" => $reservaActualizada['VALOR'],
+                "estado_reserva" => $descripcionEstado,
+                "email_usuario" => $data['email_usuario'] // Este campo se usa para enviar el correo
+            ];
+
+
             // Enviar correo de actualización de estado
-            $this->sendEmail($data['email_usuario'], 'Actualización de Reserva', [
-                "mensaje" => 'El estado de su reserva ha sido actualizado a ' . $descripcionEstado . '.'
-            ]);
+            $this->sendEmail($data['email_usuario'], 'Actualización de Reserva', $emailData);
 
             return $this->respondUpdated(['status' => 'success']);
         } else {
+            // Manejar errores en la actualización
             $error = $this->model->errors();
             log_message('error', 'Error al actualizar la reserva: ' . print_r($error, true));
             return $this->failServerError('No se pudo actualizar la reserva');
@@ -147,25 +174,17 @@ class Reservas extends ResourceController
         $email->setSubject($subject);
 
         // Cargar la plantilla de correo
-        $message = view('email_template', [
-            'fecha_reserva' => $data['FECHA_RESERVA'] ?? 'No disponible',
-            'fecha_fin' => $data['FECHA_FIN'] ?? 'No disponible',
-            'id_area_comun' => $data['ID_AREA_COMUN'] ?? 'No disponible',
-            'nombre_usuario' => $data['NOMBRE_USUARIO'] ?? 'No disponible',
-            'observacion_entrega' => $data['OBSERVACION_ENTREGA'] ?? 'No disponible',
-            'observacion_recibe' => $data['OBSERVACION_RECIBE'] ?? 'No disponible',
-            'valor' => $data['VALOR'] ?? 0,
-            'estado_reserva' => $data['ESTADO_RESERVA'] ?? 'No disponible',
-        ]);
+        // Cargar la plantilla de correo (puedes usar una vista de CodeIgniter)
+        $email->setMessage(view('email_template', $data)); // Asegúrate de tener un archivo 'email_template.php' en 'app/Views'
 
-        // Establecer el mensaje como HTML
-        $email->setMessage($message);
-        $email->setMailType('html'); // Asegúrate de enviar como HTML
-
+        // Enviar el correo
         if (!$email->send()) {
-            log_message('error', 'Error al enviar el correo: ' . $email->printDebugger(['headers']));
+            // Manejar errores de envío
+            log_message('error', 'Error al enviar el correo: ' . print_r($email->printDebugger(), true));
+            return false;
         }
-        return true; // Si se envió correctamente
+
+        return true;
     }
 
     public function show($id = null)
