@@ -3,6 +3,8 @@
 namespace App\Controllers;
 
 use App\Models\ReservasModel;
+use App\Models\UsuariosModel; // Asegúrate de tener este modelo
+use App\Models\EstadosReservaModel; // Asegúrate de tener este modelo
 use CodeIgniter\RESTful\ResourceController;
 use Config\Services;
 
@@ -56,31 +58,28 @@ class Reservas extends ResourceController
             $data['ID_ESTADO_RESERVA'] = 1; // Estado por defecto (Pendiente)
         }
 
-        // Mapeo de estados
-        $estados = [
-            1 => 'Pendiente',
-            2 => 'Aprobada',
-            3 => 'Cancelada',
-        ];
-
         // Insertar la reserva en la base de datos
         if ($this->model->insert($data)) {
             // Obtener el nombre del usuario
-            $usuarioModel = new \App\Models\UsuariosModel();
+            $usuarioModel = new UsuariosModel();
             $usuario = $usuarioModel->find($data['ID_USUARIO']);
             $nombreUsuario = $usuario['nombre'] ?? 'Usuario desconocido';
 
+            // Obtener el estado de la reserva
+            $estadoReservaModel = new EstadosReservaModel();
+            $estadoReserva = $estadoReservaModel->find($data['ID_ESTADO_RESERVA']);
+            $descripcionEstado = $estadoReserva['DESCRIPCION'] ?? 'Desconocido';
+
             // Preparar los datos del correo
-            $estadoReserva = $estados[$data['ID_ESTADO_RESERVA']] ?? 'Desconocido';
             $emailData = [
                 "FECHA_RESERVA" => $data['FECHA_RESERVA'],
                 "FECHA_FIN" => $data['FECHA_FIN'],
                 "ID_AREA_COMUN" => $data['ID_AREA_COMUN'],
-                "NOMBRE_USUARIO" => $nombreUsuario, // Nombre del usuario
+                "NOMBRE_USUARIO" => $nombreUsuario,
                 "OBSERVACION_ENTREGA" => $data['OBSERVACION_ENTREGA'] ?? '',
                 "OBSERVACION_RECIBE" => $data['OBSERVACION_RECIBE'] ?? '',
                 "VALOR" => $data['VALOR'],
-                "ID_ESTADO_RESERVA" => $data['ID_ESTADO_RESERVA'], // Usar ID para estado
+                "ESTADO_RESERVA" => $descripcionEstado, // Estado de reserva en texto
                 "email_usuario" => $data['email_usuario']
             ];
 
@@ -110,21 +109,20 @@ class Reservas extends ResourceController
             return $this->response->setJSON(['errors' => $errors])->setStatusCode(400);
         }
 
+        // Convertir los valores a UTF-8
         $data = array_map(function ($value) {
             return mb_convert_encoding($value, 'UTF-8', 'auto');
         }, $data);
 
         if ($this->model->update($id, $data)) {
+            // Obtener el estado de la reserva actualizado
+            $estadoReservaModel = new EstadosReservaModel();
+            $estadoReserva = $estadoReservaModel->find($data['ID_ESTADO_RESERVA']);
+            $descripcionEstado = $estadoReserva['DESCRIPCION'] ?? 'Desconocido';
+
             // Enviar correo de actualización de estado
             $this->sendEmail($data['email_usuario'], 'Actualización de Reserva', [
-                'FECHA_RESERVA' => $data['FECHA_RESERVA'] ?? 'No disponible',
-                'FECHA_FIN' => $data['FECHA_FIN'] ?? 'No disponible',
-                'NOMBRE_USUARIO' => 'Usuario desconocido', // Cambiar según necesites
-                'OBSERVACION_ENTREGA' => $data['OBSERVACION_ENTREGA'] ?? 'No disponible',
-                'OBSERVACION_RECIBE' => $data['OBSERVACION_RECIBE'] ?? 'No disponible',
-                'VALOR' => $data['VALOR'] ?? 0,
-                'ID_ESTADO_RESERVA' => $data['ID_ESTADO_RESERVA'] ?? 'No disponible',
-                'email_usuario' => $data['email_usuario']
+                "mensaje" => 'El estado de su reserva ha sido actualizado a ' . $descripcionEstado . '.'
             ]);
 
             return $this->respondUpdated(['status' => 'success']);
@@ -153,11 +151,11 @@ class Reservas extends ResourceController
             'fecha_reserva' => $data['FECHA_RESERVA'] ?? 'No disponible',
             'fecha_fin' => $data['FECHA_FIN'] ?? 'No disponible',
             'id_area_comun' => $data['ID_AREA_COMUN'] ?? 'No disponible',
-            'nombre_usuario' => $data['NOMBRE_USUARIO'] ?? 'No disponible', // Usar NOMBRE_USUARIO
+            'nombre_usuario' => $data['NOMBRE_USUARIO'] ?? 'No disponible',
             'observacion_entrega' => $data['OBSERVACION_ENTREGA'] ?? 'No disponible',
             'observacion_recibe' => $data['OBSERVACION_RECIBE'] ?? 'No disponible',
             'valor' => $data['VALOR'] ?? 0,
-            'estado_reserva' => $data['ID_ESTADO_RESERVA'] ?? 'No disponible',
+            'estado_reserva' => $data['ESTADO_RESERVA'] ?? 'No disponible',
         ]);
 
         // Establecer el mensaje como HTML
