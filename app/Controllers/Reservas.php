@@ -5,6 +5,7 @@ namespace App\Controllers;
 use App\Models\ReservasModel;
 use App\Models\UserModel; // Cambiado a UserModel
 use App\Models\UsuariosModel; // Cambiado a UserModel
+use App\Models\AreasComunesModel;
 use App\Models\EstadosReservaModel;
 use CodeIgniter\RESTful\ResourceController;
 use Config\Services;
@@ -74,6 +75,11 @@ class Reservas extends ResourceController
                 $nombreUsuario = 'Usuario desconocido';
             }
 
+            // Obtener el nombre del área común
+            $areasComunesModel = new AreasComunesModel();
+            $areaComun = $areasComunesModel->find($data['ID_AREA_COMUN']);
+            $nombreAreaComun = $areaComun ? $areaComun['NOMBRE'] : 'Área común desconocida';
+
             // Obtener el estado de la reserva
             $estadoReservaModel = new EstadosReservaModel();
             $estadoReserva = $estadoReservaModel->find($data['ID_ESTADO_RESERVA']);
@@ -83,7 +89,7 @@ class Reservas extends ResourceController
             $emailData = [
                 "fecha_reserva" => $data['FECHA_RESERVA'] ?? 'No disponible',
                 "fecha_fin" => $data['FECHA_FIN'] ?? 'No disponible',
-                "id_area_comun" => $data['ID_AREA_COMUN'] ?? 'No disponible',
+                "nombre_area_comun" => $nombreAreaComun,
                 "nombre_usuario" => $nombreUsuario,
                 "observacion_entrega" => $data['OBSERVACION_ENTREGA'] ?? 'No disponible',
                 "observacion_recibe" => $data['OBSERVACION_RECIBE'] ?? 'No disponible',
