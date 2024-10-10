@@ -137,6 +137,11 @@ class Reservas extends ResourceController
             // Obtener la reserva actualizada
             $reservaActualizada = $this->model->find($id);
 
+            // Obtener el nombre del área común
+            $areasComunesModel = new AreasComunesModel();
+            $areaComun = $areasComunesModel->find($data['ID_AREA_COMUN']);
+            $nombreAreaComun = $areaComun ? $areaComun['NOMBRE'] : 'Área común desconocida';
+
             // Obtener el estado de la reserva actualizado
             $estadoReservaModel = new EstadosReservaModel();
             $estadoReserva = $estadoReservaModel->find($reservaActualizada['ID_ESTADO_RESERVA']);
@@ -147,11 +152,19 @@ class Reservas extends ResourceController
             $usuario = $usuarioModel->find($reservaActualizada['ID_USUARIO']);
             $nombreUsuario = $usuario['email'] ?? 'Usuario desconocido'; // Cambiado a email, o cambia a nombre si lo agregas
 
+            // Si existe el usuario, obtenemos el nombre desde la tabla `usuarios`
+            if ($usuario && isset($usuario['usuario_id'])) {
+                $usuarioInfoModel = new UsuariosModel();
+                $usuarioInfo = $usuarioInfoModel->find($usuario['usuario_id']);
+                $nombreUsuario = $usuarioInfo ? $usuarioInfo['NOMBRE'] : 'Usuario desconocido';
+            } else {
+                $nombreUsuario = 'Usuario desconocido';
+            }
             // Preparar los datos del correo
             $emailData = [
                 "fecha_reserva" => $reservaActualizada['FECHA_RESERVA'],
                 "fecha_fin" => $reservaActualizada['FECHA_FIN'],
-                "id_area_comun" => $reservaActualizada['ID_AREA_COMUN'],
+                "nombre_area_comun" => $nombreAreaComun,
                 "nombre_usuario" => $nombreUsuario,
                 "observacion_entrega" => $reservaActualizada['OBSERVACION_ENTREGA'] ?? '',
                 "observacion_recibe" => $reservaActualizada['OBSERVACION_RECIBE'] ?? '',
