@@ -4,6 +4,7 @@ namespace App\Controllers;
 
 use App\Models\ReservasModel;
 use App\Models\UserModel; // Cambiado a UserModel
+use App\Models\UsuariosModel; // Cambiado a UserModel
 use App\Models\EstadosReservaModel;
 use CodeIgniter\RESTful\ResourceController;
 use Config\Services;
@@ -60,11 +61,18 @@ class Reservas extends ResourceController
 
         // Insertar la reserva en la base de datos
         if ($this->model->insert($data)) {
-
-            // Obtener el nombre del usuario (modifica esto según tu estructura de datos)
+            // Obtener el nombre del usuario desde la tabla usuarios
             $usuarioModel = new UserModel(); // Cambiado a UserModel
             $usuario = $usuarioModel->find($data['ID_USUARIO']);
-            $nombreUsuario = $usuario ? $usuario['email'] : 'Usuario desconocido'; // Cambiado a email, o cambia a nombre si lo agregas
+
+            // Si existe el usuario, obtenemos el nombre desde la tabla `usuarios`
+            if ($usuario && isset($usuario['usuario_id'])) {
+                $usuarioInfoModel = new UsuariosModel();
+                $usuarioInfo = $usuarioInfoModel->find($usuario['usuario_id']);
+                $nombreUsuario = $usuarioInfo ? $usuarioInfo['NOMBRE'] : 'Usuario desconocido';
+            } else {
+                $nombreUsuario = 'Usuario desconocido';
+            }
 
             // Obtener el estado de la reserva
             $estadoReservaModel = new EstadosReservaModel();
@@ -83,7 +91,6 @@ class Reservas extends ResourceController
                 "estado_reserva" => $descripcionEstado,
                 "email_usuario" => $data['email_usuario'] // Este campo se usa para enviar el correo
             ];
-
 
             // Enviar correo de confirmación de reserva
             $this->sendEmail($data['email_usuario'], 'Confirmación de Reserva', $emailData);
