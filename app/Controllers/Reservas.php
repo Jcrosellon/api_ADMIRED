@@ -35,12 +35,12 @@ class Reservas extends ResourceController
         $fechaFin = new \DateTime($data['FECHA_FIN']);
         $intervalo = $fechaInicio->diff($fechaFin);
 
-        // Verificar que la duración no exceda las 4 horas
+        // Verificar que la duración no exceda las 4 horas (aquí verificamos tanto horas como minutos)
         if ($intervalo->h > 4 || ($intervalo->h == 4 && $intervalo->i > 0)) {
             return $this->response->setJSON(['error' => 'La duración de la reserva no puede ser mayor a 4 horas.'])->setStatusCode(409);
         }
 
-        // Verificar conflictos con otras reservas
+        // Verificar conflictos con otras reservas para el mismo área común
         $conflicto = $this->model->where('ID_AREA_COMUN', $data['ID_AREA_COMUN'])
             ->where('FECHA_RESERVA <', $data['FECHA_FIN'])
             ->where('FECHA_FIN >', $data['FECHA_RESERVA'])
@@ -50,11 +50,6 @@ class Reservas extends ResourceController
             return $this->response->setJSON(['error' => 'Ya existe una reserva en este horario para el área común seleccionada.'])->setStatusCode(409);
         }
 
-        // Convertir los valores a UTF-8
-        $data = array_map(function ($value) {
-            return mb_convert_encoding($value, 'UTF-8', 'auto');
-        }, $data);
-
         // Asignar estado de reserva por defecto si no está definido
         if (!isset($data['ID_ESTADO_RESERVA'])) {
             $data['ID_ESTADO_RESERVA'] = 1; // Estado por defecto (Pendiente)
@@ -63,7 +58,7 @@ class Reservas extends ResourceController
         // Insertar la reserva en la base de datos
         if ($this->model->insert($data)) {
             // Obtener el nombre del usuario desde la tabla usuarios
-            $usuarioModel = new UserModel(); // Cambiado a UserModel
+            $usuarioModel = new UserModel();
             $usuario = $usuarioModel->find($data['ID_USUARIO']);
 
             // Si existe el usuario, obtenemos el nombre desde la tabla `usuarios`
@@ -99,16 +94,21 @@ class Reservas extends ResourceController
             ];
 
             // Enviar correo de confirmación de reserva
-            $this->sendEmail($data['email_usuario'], 'Confirmación de Reserva', $emailData);
+            try {
+                $this->sendEmail($data['email_usuario'], 'Confirmación de Reserva', $emailData);
+            } catch (\Exception $e) {
+                log_message('error', 'Error al enviar el correo: ' . $e->getMessage());
+            }
 
             return $this->respondCreated(['status' => 'success']);
         } else {
             // Manejar errores en la inserción
             $error = $this->model->errors();
-            log_message('error', 'Error al insertar la reserva: ' . print_r($error, true));
+            log_message('error', 'Error al insertar la reserva: ' . json_encode($error));
             return $this->failServerError('No se pudo crear la reserva');
         }
     }
+
 
     public function update($id = null)
     {

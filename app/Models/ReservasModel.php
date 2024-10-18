@@ -39,7 +39,7 @@ class ReservasModel extends Model
         'FECHA_FIN' => [
             'required' => 'La fecha de fin es obligatoria.',
             'valid_date' => 'La fecha de fin no es válida.',
-            'greater_than' => 'La fecha de fin debe ser posterior a la fecha de inicio.'
+            // El mensaje 'greater_than' no es necesario aquí, ya que la validación de fechas se hace en el controlador.
         ],
         'ID_AREA_COMUN' => [
             'required' => 'El área común es obligatoria.',
@@ -49,7 +49,7 @@ class ReservasModel extends Model
 
     protected $skipValidation = false;
 
-    // Cambia la firma de este método para que coincida con la clase base
+    // Permite agregar reglas dinámicamente si es necesario
     public function getValidationRules(array $options = []): array
     {
         return array_merge($this->validationRules, $options);

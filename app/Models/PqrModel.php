@@ -24,6 +24,33 @@ class PqrModel extends Model
         'RESPUESTA' => 'permit_empty',
     ];
 
-    protected $validationMessages = [];
+    protected $validationMessages = [
+        'DETALLE' => [
+            'required' => 'El detalle es obligatorio.',
+        ],
+        'ESTADO_ID' => [
+            'required' => 'El estado es obligatorio.',
+            'integer' => 'El estado debe ser un número entero.',
+        ],
+        'USUARIO_ID' => [
+            'required' => 'El ID de usuario es obligatorio.',
+            'integer' => 'El ID de usuario debe ser un número entero.',
+        ],
+        'PQR_TIPO_ID' => [
+            'required' => 'El tipo de PQR es obligatorio.',
+            'integer' => 'El tipo de PQR debe ser un número entero.',
+        ],
+        'FECHA_SOLICITUD' => [
+            'required' => 'La fecha de solicitud es obligatoria.',
+            'valid_date' => 'La fecha de solicitud no es válida.',
+        ],
+        'FECHA_RESPUESTA' => [
+            'valid_date' => 'La fecha de respuesta no es válida.',
+        ],
+        'RESPUESTA' => [
+            'permit_empty' => 'La respuesta es opcional.',
+        ],
+    ];
+
     protected $skipValidation = false;
 }

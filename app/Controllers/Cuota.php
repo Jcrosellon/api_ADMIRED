@@ -2,179 +2,128 @@
 
 namespace App\Controllers;
 
-use App\Models\CuotaModel;
-use CodeIgniter\HTTP\ResponseInterface;
+use App\Models\CuotaModel; // Asegúrate de que este modelo existe
+use App\Models\UnidadesResidencialesModel;
 
 class Cuota extends BaseController
 {
-    public function create()
+    protected $cuotaModel;
+    protected $unidadesResidencialesModel;
+
+    public function __construct()
     {
-        $cuotaModel = new CuotaModel();
-        $unidadResidencialId = $this->request->getVar('UNIDAD_RESIDENCIAL_ID');
-        $estado = $this->request->getVar('ESTADO');
-
-        // Registra los valores recibidos
-        log_message('debug', 'UNIDAD_RESIDENCIAL_ID: ' . $unidadResidencialId);
-        log_message('debug', 'ESTADO: ' . $estado);
-
-        // Verifica si hay cuotas disponibles para la unidad residencial
-        $cuotasDisponibles = $cuotaModel->where('UNIDAD_RESIDENCIAL_ID', $unidadResidencialId)
-            ->where('ESTADO', $estado)
-            ->findAll();
-
-        // Registra las cuotas encontradas
-        log_message('debug', 'Cuotas Disponibles: ' . print_r($cuotasDisponibles, true));
-
-        if (empty($cuotasDisponibles)) {
-            return $this->response->setJSON([
-                'data' => '',
-                'message' => 'No hay cuotas disponibles para esta unidad residencial.',
-                'response' => ResponseInterface::HTTP_NOT_FOUND,
-            ]);
-        }
-
-        // Si hay cuotas disponibles, continúa con la creación de una nueva cuota
-        $data = [
-            'FECHA_MES' => $this->request->getVar('FECHA_MES'),
-            'ESTADO' => $this->request->getVar('ESTADO'),
-            'VALOR' => $this->request->getVar('VALOR'),
-            'NO_APTO' => $this->request->getVar('NO_APTO'),
-            'FECHA_PAGO' => $this->request->getVar('FECHA_PAGO'),
-            'UNIDAD_RESIDENCIAL_ID' => $unidadResidencialId
-        ];
-
-        log_message('debug', 'Datos a Insertar: ' . print_r($data, true));
-
-        if ($cuotaModel->insert($data)) {
-            return $this->response->setJSON([
-                'data' => $data,
-                'message' => 'Cuota creada exitosamente',
-                'response' => ResponseInterface::HTTP_OK,
-            ]);
-        } else {
-            return $this->response->setJSON([
-                'data' => '',
-                'message' => 'Error al crear la cuota',
-                'response' => ResponseInterface::HTTP_CONFLICT,
-            ]);
-        }
+        $this->cuotaModel = new CuotaModel();
+        $this->unidadesResidencialesModel = new UnidadesResidencialesModel();
     }
 
-
-
-
-    // Nuevo método para obtener la cuota por ID de unidad residencial
-    public function showByUser($unidadResidencialId)
+    public function create()
     {
-        $cuotaModel = new CuotaModel();
+        $usuarioId = $this->request->getPost('usuario_id');
 
-        // Busca la cuota de administración de la unidad residencial por ID
-        $cuota = $cuotaModel->where('UNIDAD_RESIDENCIAL_ID', $unidadResidencialId)->first();
+        // Obtén la unidad residencial asociada al usuario
+        $unidad = $this->unidadesResidencialesModel->getByUserId($usuarioId);
 
-        if ($cuota) {
-            $dataResult = [
-                "data" => $cuota,
-                "message" => 'Cuota Encontrada',
-                "response" => ResponseInterface::HTTP_OK,
-            ];
-        } else {
-            $dataResult = [
-                "data" => '',
-                "message" => 'No hay cuota de administración para esta unidad residencial',
-                "response" => ResponseInterface::HTTP_NOT_FOUND,
-            ];
+        if (!$unidad) {
+            return $this->response->setStatusCode(404)->setJSON(['error' => 'El usuario no tiene una unidad residencial asociada.']);
         }
 
-        return $this->response->setJSON($dataResult);
+        // Verifica si ya existe una cuota para el mes actual
+        $fechaMes = date('Y-m-01'); // Primer día del mes actual
+        if ($this->cuotaModel->cuotaExistente($unidad['ID'], $fechaMes)) {
+            return $this->response->setStatusCode(400)->setJSON(['error' => 'Ya existe una cuota generada para este mes.']);
+        }
+
+        // Preparar datos de la nueva cuota
+        $data = [
+            'FECHA_MES' => $fechaMes,
+            'ESTADO' => 'Pendiente',
+            'VALOR' => $unidad['VALOR_CUOTA'],
+            'NO_APTO' => $unidad['NO_APARTAMENTO'],
+            'FECHA_PAGO' => null, // Inicialmente no hay fecha de pago
+            'UNIDAD_RESIDENCIAL_ID' => $unidad['ID'],
+            'USUARIO_ID' => $usuarioId,
+        ];
+
+        // Insertar cuota
+        if ($this->cuotaModel->insert($data)) {
+            return $this->response->setStatusCode(201)->setJSON(['message' => 'Cuota creada con éxito']);
+        } else {
+            return $this->response->setStatusCode(400)->setJSON(['error' => 'Error al crear la cuota']);
+        }
     }
 
     public function show($id)
     {
-        $cuotaModel = new CuotaModel();
-        $cuota = $cuotaModel->find($id);
+        $cuota = $this->cuotaModel->find($id); // Asumiendo que 'find' es un método en tu modelo
 
         if ($cuota) {
-            return $this->response->setJSON([
-                'data' => $cuota,
-                'message' => 'Cuota encontrada',
-                'response' => ResponseInterface::HTTP_OK,
-            ]);
+            return $this->response->setJSON($cuota);
         } else {
-            return $this->response->setJSON([
-                'data' => '',
-                'message' => 'No se encontró la cuota',
-                'response' => ResponseInterface::HTTP_NOT_FOUND,
-            ]);
+            return $this->response->setStatusCode(404)->setJSON(['error' => 'Cuota no encontrada']);
         }
     }
 
     public function update($id)
     {
-        $cuotaModel = new CuotaModel();
+        $data = $this->request->getRawInput();
 
-        // Verifica si la cuota existe
-        $cuota = $cuotaModel->find($id);
+        if ($this->cuotaModel->update($id, $data)) {
+            return $this->response->setStatusCode(200)->setJSON(['message' => 'Cuota actualizada con éxito']);
+        } else {
+            return $this->response->setStatusCode(400)->setJSON(['error' => 'Error al actualizar la cuota']);
+        }
+    }
+
+    // Método para mostrar la unidad residencial asociada a una cuota
+    public function getUnidadResidencial($id)
+    {
+        // Obtener la cuota por ID
+        $cuota = $this->cuotaModel->find($id);
+
         if (!$cuota) {
-            return $this->response->setJSON([
-                'data' => '',
-                'message' => 'Cuota no encontrada',
-                'response' => ResponseInterface::HTTP_NOT_FOUND,
-            ]);
+            return $this->response->setStatusCode(404)->setJSON(['error' => 'Cuota no encontrada']);
         }
 
-        // Datos de la solicitud
-        $data = [
-            'FECHA_MES' => $this->request->getVar('FECHA_MES'),
-            'ESTADO' => $this->request->getVar('ESTADO'),
-            'VALOR' => $this->request->getVar('VALOR'),
-            'NO_APTO' => $this->request->getVar('NO_APTO'),
-            'FECHA_PAGO' => $this->request->getVar('FECHA_PAGO'),
-            'UNIDAD_RESIDENCIAL_ID' => $this->request->getVar('UNIDAD_RESIDENCIAL_ID'),
-        ];
+        // Obtener la unidad residencial usando el UNIDAD_RESIDENCIAL_ID de la cuota
+        $unidad = $this->unidadesResidencialesModel->getById($cuota['UNIDAD_RESIDENCIAL_ID']);
 
-        // Actualiza la cuota en la base de datos
-        if ($cuotaModel->update($id, $data)) {
-            return $this->response->setJSON([
-                'data' => $data,
-                'message' => 'Cuota actualizada exitosamente',
-                'response' => ResponseInterface::HTTP_OK,
-            ]);
+        if ($unidad) {
+            return $this->response->setJSON($unidad);
         } else {
-            return $this->response->setJSON([
-                'data' => '',
-                'message' => 'Error al actualizar la cuota',
-                'response' => ResponseInterface::HTTP_CONFLICT,
-            ]);
+            return $this->response->setStatusCode(404)->setJSON(['error' => 'Unidad residencial no encontrada']);
+        }
+    }
+
+    // Nueva función para obtener cuotas por usuario
+    public function showByUser($usuarioId)
+    {
+        $cuotas = $this->cuotaModel->getCuotasByUserId($usuarioId);
+
+        if ($cuotas) {
+            return $this->response->setJSON($cuotas);
+        } else {
+            return $this->response->setStatusCode(404)->setJSON(['error' => 'No se encontraron cuotas para el usuario.']);
         }
     }
 
     public function delete($id)
     {
-        $cuotaModel = new CuotaModel();
-
-        // Verifica si la cuota existe
-        $cuota = $cuotaModel->find($id);
-        if (!$cuota) {
-            return $this->response->setJSON([
-                'data' => '',
-                'message' => 'Cuota no encontrada',
-                'response' => ResponseInterface::HTTP_NOT_FOUND,
-            ]);
-        }
-
-        // Elimina la cuota de la base de datos
-        if ($cuotaModel->delete($id)) {
-            return $this->response->setJSON([
-                'data' => '',
-                'message' => 'Cuota eliminada exitosamente',
-                'response' => ResponseInterface::HTTP_OK,
-            ]);
+        if ($this->cuotaModel->delete($id)) {
+            return $this->response->setStatusCode(200)->setJSON(['message' => 'Cuota eliminada con éxito']);
         } else {
-            return $this->response->setJSON([
-                'data' => '',
-                'message' => 'Error al eliminar la cuota',
-                'response' => ResponseInterface::HTTP_CONFLICT,
-            ]);
+            return $this->response->setStatusCode(400)->setJSON(['error' => 'Error al eliminar la cuota']);
+        }
+    }
+
+    // Método para obtener todas las cuotas
+    public function index()
+    {
+        $cuotas = $this->cuotaModel->findAll();
+
+        if ($cuotas) {
+            return $this->response->setJSON($cuotas);
+        } else {
+            return $this->response->setStatusCode(404)->setJSON(['error' => 'No se encontraron cuotas.']);
         }
     }
 }

@@ -6,20 +6,28 @@ use CodeIgniter\Model;
 
 class CuotaModel extends Model
 {
-    protected $DBGroup          = 'default';
-    protected $table            = 'cuotas_administracion';
-    protected $primaryKey       = 'ID';
-    protected $useAutoIncrement = true;
-    protected $returnType       = 'array';
-    protected $useSoftDeletes   = false;
-    protected $protectFields    = true;
-    protected $allowedFields    = ['FECHA_MES', 'ESTADO', 'VALOR', 'NO_APTO', 'FECHA_PAGO', 'UNIDAD_RESIDENCIAL_ID'];
-
-    protected $validationRules = [
-        'FECHA_MES' => 'required|valid_date',
-        'ESTADO' => 'required|string',
-        'VALOR' => 'required|decimal',
-        'NO_APTO' => 'permit_empty|string',
-        'FECHA_PAGO' => 'permit_empty|valid_date',
+    protected $table = 'cuotas_administracion';
+    protected $primaryKey = 'ID';
+    protected $allowedFields = [
+        'FECHA_MES',
+        'ESTADO',
+        'VALOR',
+        'NO_APTO',
+        'FECHA_PAGO',
+        'UNIDAD_RESIDENCIAL_ID',
+        'USUARIO_ID',
     ];
+
+    public function cuotaExistente($unidadId, $fechaMes)
+    {
+        return $this->where('UNIDAD_RESIDENCIAL_ID', $unidadId)
+            ->where('FECHA_MES', $fechaMes)
+            ->first();
+    }
+
+    // Método para obtener las cuotas por usuario
+    public function getCuotasByUserId($usuarioId)
+    {
+        return $this->where('USUARIO_ID', $usuarioId)->findAll();
+    }
 }

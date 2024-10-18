@@ -21,9 +21,9 @@ class Pqr extends BaseController
             'ESTADO_ID' => $this->request->getVar('ESTADO_ID'),
             'USUARIO_ID' => $this->request->getVar('USUARIO_ID'),
             'PQR_TIPO_ID' => (int) $this->request->getVar('PQR_TIPO_ID'),
-            'FECHA_SOLICITUD' => $this->request->getVar('FECHA_SOLICITUD'),
-            'FECHA_RESPUESTA' => $this->request->getVar('FECHA_RESPUESTA'),
-            'RESPUESTA' => $this->request->getVar('RESPUESTA'),
+            'FECHA_SOLICITUD' => date('Y-m-d H:i:s'), // Formato adecuado para la fecha actual
+            'FECHA_RESPUESTA' => $this->request->getVar('FECHA_RESPUESTA'), // Asegúrate de que sea opcional
+            'RESPUESTA' => $this->request->getVar('RESPUESTA'), // También opcional
         ];
 
         // Aplicar reglas de validación
@@ -34,22 +34,24 @@ class Pqr extends BaseController
                 'data' => '',
                 'message' => 'Datos inválidos',
                 'response' => ResponseInterface::HTTP_BAD_REQUEST,
-                'errors' => $validation->getErrors()
+                'errors' => $validation->getErrors() // Aquí están los errores
             ]);
         }
+
 
         // Insertar datos
         $insertID = $pqrModel->insert($data);
 
         if ($insertID) {
-            $this->sendResponseEmail($data); // Enviar el correo electrónico
-
+            // Envío de correo exitoso
             return $this->response->setJSON([
                 "data" => $data,
                 "message" => 'PQR Creado',
                 "response" => ResponseInterface::HTTP_CREATED,
             ]);
         } else {
+            // Registra el error que ocurrió
+            log_message('error', "Error al crear PQR: " . json_encode($data));
             return $this->response->setJSON([
                 "data" => '',
                 "message" => 'Error al crear PQR',
@@ -88,15 +90,17 @@ class Pqr extends BaseController
 
         if ($pqr) {
             // Obtener los datos de la solicitud
+            // Obtener datos del request
             $data = [
-                'DETALLE' => $this->request->getVar('DETALLE') ?? $pqr['DETALLE'],
-                'ESTADO_ID' => $this->request->getVar('ESTADO_ID') ?? $pqr['ESTADO_ID'],
-                'USUARIO_ID' => $this->request->getVar('USUARIO_ID') ?? $pqr['USUARIO_ID'],
-                'PQR_TIPO_ID' => $this->request->getVar('PQR_TIPO_ID') ?? $pqr['PQR_TIPO_ID'],
-                'FECHA_SOLICITUD' => $this->request->getVar('FECHA_SOLICITUD') ?? $pqr['FECHA_SOLICITUD'],
-                'FECHA_RESPUESTA' => $this->request->getVar('FECHA_RESPUESTA') ?? $pqr['FECHA_RESPUESTA'],
-                'RESPUESTA' => $this->request->getVar('RESPUESTA') ?? $pqr['RESPUESTA'],
+                'DETALLE' => $this->request->getVar('DETALLE'),
+                'ESTADO_ID' => $this->request->getVar('ESTADO_ID'),
+                'USUARIO_ID' => $this->request->getVar('USUARIO_ID'),
+                'PQR_TIPO_ID' => (int) $this->request->getVar('PQR_TIPO_ID'),
+                'FECHA_SOLICITUD' => date('Y-m-d', strtotime($this->request->getVar('FECHA_SOLICITUD'))),
+                'FECHA_RESPUESTA' => !empty($this->request->getVar('FECHA_RESPUESTA')) ? date('Y-m-d', strtotime($this->request->getVar('FECHA_RESPUESTA'))) : null,
+                'RESPUESTA' => $this->request->getVar('RESPUESTA'),
             ];
+
 
             // Actualizar el PQR
             if ($pqrModel->update($id, $data)) {

@@ -55,13 +55,13 @@ $routes->group("api", ['filter' => 'cors'], function ($routes) {
     $routes->options('pqr/(:any)', '\Dummy');
 
     // PQR Tipo
-    $routes->post("pqr_tipos/create", "PqrTipo::create");
-    $routes->get("pqr_tipos/show/(:num)", "PqrTipo::show/$1");
-    $routes->get("pqr_tipos", "PqrTipo::index"); // Este método obtiene todos los tipos de PQR
-    $routes->put("pqr_tipos/update/(:num)", "PqrTipo::update/$1");
-    $routes->delete("pqr_tipos/delete/(:num)", "PqrTipo::delete/$1");
-    $routes->options('pqr_tipos', '\Dummy');
-    $routes->options('pqr_tipos/(:any)', '\Dummy');
+    $routes->post("pqr_tipo/create", "PqrTipo::create");
+    $routes->get("pqr_tipo/show/(:num)", "PqrTipo::show/$1");
+    $routes->get("pqr_tipo", "PqrTipo::index"); // Este método obtiene todos los tipos de PQR
+    $routes->put("pqr_tipo/update/(:num)", "PqrTipo::update/$1");
+    $routes->delete("pqr_tipo/delete/(:num)", "PqrTipo::delete/$1");
+    $routes->options('pqr_tipo', '\Dummy');
+    $routes->options('pqr_tipo/(:any)', '\Dummy');
 
     // Cuota Administracion
     $routes->post("cuotas_administracion/create", "Cuota::create");
@@ -72,4 +72,6 @@ $routes->group("api", ['filter' => 'cors'], function ($routes) {
     $routes->get('cuotas_administracion/user/(:num)', 'Cuota::showByUser/$1'); // Nueva ruta para obtener cuota por usuario
     $routes->options('cuotas_administracion', '\Dummy');
     $routes->options('cuotas_administracion/(:any)', '\Dummy');
+    $routes->get('cuotas_administracion/unidad/(:num)', 'UnidadesResidenciales::getUnidadResidencialId/$1');
+    $routes->get('unidades_residenciales/user/(:num)', 'UnidadesResidenciales::getByUserId/$1');
 });
