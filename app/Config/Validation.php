@@ -53,14 +53,48 @@ class Validation extends BaseConfig
     ];
 
     public $pqr = [
-        'DETALLE' => 'required|string',
-        'ESTADO_ID' => 'required|numeric',
-        'USUARIO_ID' => 'required|numeric',
-        'PQR_TIPO_ID' => 'required|numeric',  // Actualizado aquí
-        'FECHA_SOLICITUD' => 'required|valid_date',
-        'FECHA_RESPUESTA' => 'permit_empty|valid_date',
-        'RESPUESTA' => 'permit_empty|string',
+        'DETALLE' => [
+            'rules' => 'required|string',
+            'errors' => [
+                'required' => 'El campo detalle es obligatorio.',
+                'string' => 'El campo detalle debe ser una cadena de texto válida.'
+            ]
+        ],
+        'ESTADO_ID' => [
+            'rules' => 'required|numeric',
+            'errors' => [
+                'required' => 'El campo estado es obligatorio.',
+                'numeric' => 'El campo estado debe ser un número.'
+            ]
+        ],
+        'USUARIO_ID' => [
+            'rules' => 'required|integer', // Asegúrate de validar el usuario
+            'errors' => [
+                'required' => 'El campo usuario es obligatorio.',
+                'integer' => 'El campo usuario debe ser un número entero.'
+            ]
+        ],
+        'PQR_TIPO_ID' => [
+            'rules' => 'required|integer', // Asegúrate de validar el tipo de PQR
+            'errors' => [
+                'required' => 'El campo tipo de PQR es obligatorio.',
+                'integer' => 'El campo tipo de PQR debe ser un número entero.'
+            ]
+        ],
+        'FECHA_RESPUESTA' => [
+            'rules' => 'permit_empty|valid_date', // Opcional, pero debe ser una fecha válida si se proporciona
+            'errors' => [
+                'valid_date' => 'La fecha de respuesta debe ser una fecha válida.'
+            ]
+        ],
+        'RESPUESTA' => [
+            'rules' => 'permit_empty|string', // Opcional
+            'errors' => [
+                'string' => 'La respuesta debe ser una cadena de texto válida.'
+            ]
+        ],
     ];
+
 
     // Validation.php
     public $cuota = [

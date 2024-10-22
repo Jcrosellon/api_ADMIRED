@@ -20,9 +20,10 @@ class PqrModel extends Model
         'USUARIO_ID' => 'required|integer',
         'PQR_TIPO_ID' => 'required|integer',
         'FECHA_SOLICITUD' => 'required|valid_date',
-        'FECHA_RESPUESTA' => 'valid_date',
+        'FECHA_RESPUESTA' => 'permit_empty|valid_date', // Cambiado aquí
         'RESPUESTA' => 'permit_empty',
     ];
+
 
     protected $validationMessages = [
         'DETALLE' => [

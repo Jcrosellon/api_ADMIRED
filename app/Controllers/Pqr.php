@@ -21,9 +21,9 @@ class Pqr extends BaseController
             'ESTADO_ID' => $this->request->getVar('ESTADO_ID'),
             'USUARIO_ID' => $this->request->getVar('USUARIO_ID'),
             'PQR_TIPO_ID' => (int) $this->request->getVar('PQR_TIPO_ID'),
-            'FECHA_SOLICITUD' => date('Y-m-d H:i:s'), // Formato adecuado para la fecha actual
-            'FECHA_RESPUESTA' => $this->request->getVar('FECHA_RESPUESTA'), // Asegúrate de que sea opcional
-            'RESPUESTA' => $this->request->getVar('RESPUESTA'), // También opcional
+            'FECHA_SOLICITUD' => date('Y-m-d H:i:s'),
+            'FECHA_RESPUESTA' => $this->request->getVar('FECHA_RESPUESTA'), // Opcional
+            'RESPUESTA' => $this->request->getVar('RESPUESTA'), // Opcional
         ];
 
         // Aplicar reglas de validación
@@ -34,24 +34,41 @@ class Pqr extends BaseController
                 'data' => '',
                 'message' => 'Datos inválidos',
                 'response' => ResponseInterface::HTTP_BAD_REQUEST,
-                'errors' => $validation->getErrors() // Aquí están los errores
+                'errors' => $validation->getErrors() // Devuelve los errores de validación
             ]);
         }
 
+        // Procesar archivos si existen
+        if ($this->request->getFiles()) {
+            $files = $this->request->getFiles();
+            $uploadPaths = [];
+
+            foreach ($files as $file) {
+                if ($file->isValid() && !$file->hasMoved()) {
+                    $newName = $file->getRandomName(); // Genera un nombre aleatorio
+                    $file->move(WRITEPATH . 'uploads', $newName); // Mueve el archivo a la carpeta de uploads
+                    $uploadPaths[] = WRITEPATH . 'uploads/' . $newName; // Guardar la ruta
+                }
+            }
+
+            // Guardar la ruta de los archivos subidos en los datos de PQR (opcional)
+            if (!empty($uploadPaths)) {
+                $data['ARCHIVOS'] = json_encode($uploadPaths); // Asume que tienes un campo ARCHIVOS en la tabla PQR
+            }
+        }
 
         // Insertar datos
         $insertID = $pqrModel->insert($data);
-
+        log_message('info', 'Datos a insertar en PQR: ' . json_encode($data));
         if ($insertID) {
-            // Envío de correo exitoso
+            log_message('info', 'Datos de PQR insertados correctamente: ' . json_encode($data));
             return $this->response->setJSON([
                 "data" => $data,
-                "message" => 'PQR Creado',
+                "message" => 'PQR creado exitosamente',
                 "response" => ResponseInterface::HTTP_CREATED,
             ]);
         } else {
-            // Registra el error que ocurrió
-            log_message('error', "Error al crear PQR: " . json_encode($data));
+            log_message('error', 'Error al crear PQR: ' . json_encode($data));
             return $this->response->setJSON([
                 "data" => '',
                 "message" => 'Error al crear PQR',
@@ -59,6 +76,7 @@ class Pqr extends BaseController
             ]);
         }
     }
+
 
     public function show($id)
     {
@@ -90,7 +108,6 @@ class Pqr extends BaseController
 
         if ($pqr) {
             // Obtener los datos de la solicitud
-            // Obtener datos del request
             $data = [
                 'DETALLE' => $this->request->getVar('DETALLE'),
                 'ESTADO_ID' => $this->request->getVar('ESTADO_ID'),
@@ -100,7 +117,6 @@ class Pqr extends BaseController
                 'FECHA_RESPUESTA' => !empty($this->request->getVar('FECHA_RESPUESTA')) ? date('Y-m-d', strtotime($this->request->getVar('FECHA_RESPUESTA'))) : null,
                 'RESPUESTA' => $this->request->getVar('RESPUESTA'),
             ];
-
 
             // Actualizar el PQR
             if ($pqrModel->update($id, $data)) {
@@ -157,7 +173,6 @@ class Pqr extends BaseController
             ]);
         }
     }
-
 
     private function sendResponseEmail($data)
     {
