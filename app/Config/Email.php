@@ -6,7 +6,7 @@ use CodeIgniter\Config\BaseConfig;
 
 class Email extends BaseConfig
 {
-    public string $fromEmail  = 'tu_correo@gmail.com'; // Tu correo de Gmail
+    public string $fromEmail  = 'joserosellonl@gmail.com'; // Tu correo de Gmail
     public string $fromName   = 'admired'; // Nombre del remitente
     public string $recipients = '';
 
